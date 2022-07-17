@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "Window.h"
 #include "Debugger.h"
+#include "MainWindow.h"
 
 class Emulator {
     public:
@@ -13,9 +14,6 @@ class Emulator {
         void run();
 
     private:
-        Window *_window1;
-        // Window *_window2;
+        MainWindow *_main;
         Debugger *_debug;
-        Chip8 _c8;
-        // Renderer _renderer;
 };

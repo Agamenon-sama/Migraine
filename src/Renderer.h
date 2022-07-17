@@ -10,11 +10,11 @@ public:
     void clear();
     void render(const uint8_t x, const uint8_t y, const uint8_t n);
     void draw();
-    void swapBuff();
+    void swapBuff(SDL_Window *win);
 
     // bool drawFlag;
 private:
-    SDL_Renderer *_renderer;
+    // SDL_Renderer *_renderer;
     uint8_t _frameMap[32][64];
 };
 

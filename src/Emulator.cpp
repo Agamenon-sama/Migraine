@@ -1,7 +1,6 @@
 #include "Emulator.h"
 
 #include <glad/glad.h>
-// #include <GL/gl.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
@@ -18,28 +17,28 @@ Emulator::Emulator(const std::string &path) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-    _window1 = new Window("First window", 800, 600);
-    // _window2 = new Window("Second window", 400, 300);
-    _c8.load(path);
-    _debug = new Debugger(_c8.mem);
-    std::cout << "Finished constractor of Emulator\n";
+    _main  = new MainWindow(path);
+    _debug = new Debugger(_main->_c8->mem);
+
+    // Load OpenGL. NEVER FORGET TO LOAD OpenGL
+    if (!gladLoadGLLoader(((GLADloadproc) SDL_GL_GetProcAddress))) {
+        std::cerr << "Failed to load OpenGL\n";
+        exit(1);
+    }
 }
 
 Emulator::~Emulator() {
-    // delete _window2;
     delete _debug;
-    delete _window1;
+    delete _main;
     SDL_Quit();
 }
 
 void Emulator::run() {
-    std::cout << "running the emulator\n";
     bool running = true;
     SDL_Event event;
 
     // Main loop
     while (running) {
-        // std::cout << "In main loop\n";
         // Event handling
         while (SDL_PollEvent(&event)) {
             if(event.type == SDL_QUIT) {
@@ -48,16 +47,12 @@ void Emulator::run() {
             }
 
             // handle window events
-            _window1->handleEvents(event);
-            // _window2->handleEvents(event);
+            _main->handleEvents(event);
             _debug->handleEvents(event);
             _debug->_gui.handleEvents(event);
 
             // close the app if all windows are closed
-            // if(!_window1->isShown() && !_window2->isShown()) {
-            if(!_window1->isShown() && !_debug->isShown()) {
-            // if(!_debug->isShown()) {
-                std::cout << "Exiting\n";
+            if(!_main->isShown() && !_debug->isShown()) {
                 SDL_Event tempEvent;
                 tempEvent.type = SDL_QUIT;
                 SDL_PushEvent(&tempEvent);
@@ -66,7 +61,10 @@ void Emulator::run() {
 
         // Rendering
         _debug->render();
+        _main->render();
         
+        _main->swapBuffers();
+        _debug->swapBuffers();
     }
     
 }

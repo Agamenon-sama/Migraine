@@ -1,20 +1,17 @@
 #include <fstream>
 
+#include <string.h>
+
 #include "chip8.h"
 
 Chip8::Chip8() {
-    // Initilizing register
-    i = 0;
-    sp = 0;
-    pc = 0x0200;
-    opcode = 0;
-    delayTimer = 0;
-    soundTimer = 0;
-
     // allocating memory
     stack = new uint16_t [16];
     v = new uint8_t [16];
     mem = new uint8_t [4096];
+
+    // set registers and memory
+    reset();
 
     // Seeding the rng
     rng.seed(std::chrono::steady_clock().now().time_since_epoch().count()); // I love chrono Black Magic :)
@@ -24,6 +21,22 @@ Chip8::~Chip8() {
     delete [] stack;
     delete [] v;
     delete [] mem;
+}
+
+void Chip8::reset() {
+    // Initilizing register
+    i = 0;
+    sp = 0;
+    pc = 0x0200;
+    opcode = 0;
+    delayTimer = 0;
+    soundTimer = 0;
+
+    memset(stack, 0, 2 * 16);
+    memset(v, 0, 16);
+
+    // clear memory
+    memset(mem, 0, 4096);
 }
 
 bool Chip8::load(const std::string &path) {
@@ -96,10 +109,6 @@ void Chip8::emulateCycle() {
     n   = opcode & 0x000F; // the lowest 4 bits
     kk  = opcode & 0x00FF; // the lowest 8 bits
     nnn = opcode & 0x0FFF; // the lowest 12 bits
-
-#ifdef DEBUG 
-    printf("pc: 0x%04x Op: 0x%04x\n", pc, opcode);
-#endif
 
     // decode & execute: case on the highest order byte
     switch (opcode & 0xF000) {

@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 
-// #include <GL/gl.h>
 #include <glad/glad.h>
 #include <SDL2/SDL_opengl.h>
 
@@ -24,6 +23,8 @@ Window::Window(std::string title, int width, int height, bool resizable) {
     }
 
     _windowID = SDL_GetWindowID(_window);
+
+    createGLContext();
 
     _width = width;
     _height = height;
@@ -111,7 +112,12 @@ void Window::free() {
     SDL_GL_DeleteContext(_glContext);
 }
 
+void Window::makeCurrent() {
+    SDL_GL_MakeCurrent(_window, _glContext);
+}
+
 void Window::swapBuffers() {
+    makeCurrent();
     SDL_GL_SwapWindow(_window);
 }
 

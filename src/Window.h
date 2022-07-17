@@ -6,14 +6,15 @@
 class Window {
     public:
         Window(std::string title, int width, int height, bool resizable = false);
-        ~Window();
+        virtual ~Window();
 
         bool init();
         void handleEvents(SDL_Event &ev);
         void free();
-        void createGLContext();
-        void swapBuffers();
         void focus();
+        void createGLContext();
+        virtual void swapBuffers();
+        void makeCurrent();
 
 
         SDL_Window *getSDLWindow() const;

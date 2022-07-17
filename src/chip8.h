@@ -12,6 +12,7 @@ public:
     ~Chip8();
 
     bool load(const std::string &path);
+    void reset();
     bool dumpMem();
     void emulateCycle();
 
