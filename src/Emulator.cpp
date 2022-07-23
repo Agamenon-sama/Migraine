@@ -18,7 +18,7 @@ Emulator::Emulator(const std::string &path) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     _main  = new MainWindow(path);
-    _debug = new Debugger(_main->_c8->mem);
+    _debug = new Debugger(_main->_c8);
 
     // Load OpenGL. NEVER FORGET TO LOAD OpenGL
     if (!gladLoadGLLoader(((GLADloadproc) SDL_GL_GetProcAddress))) {
