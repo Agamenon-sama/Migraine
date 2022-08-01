@@ -13,6 +13,7 @@ public:
 
     bool load(const std::string &path);
     void reset();
+    void unset();
     bool dumpMem();
     void emulateCycle();
 

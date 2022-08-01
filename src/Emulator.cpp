@@ -10,7 +10,7 @@
 #include <imgui/imgui_memory_editor.h>
 
 
-Emulator::Emulator(const std::string &path) {
+Emulator::Emulator(const std::string &path, bool debugMode) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -19,6 +19,7 @@ Emulator::Emulator(const std::string &path) {
 
     _main  = new MainWindow(path);
     _debug = new Debugger(_main->_c8);
+    _debugMode = debugMode;
 
     // Load OpenGL. NEVER FORGET TO LOAD OpenGL
     if (!gladLoadGLLoader(((GLADloadproc) SDL_GL_GetProcAddress))) {
@@ -57,6 +58,10 @@ void Emulator::run() {
                 tempEvent.type = SDL_QUIT;
                 SDL_PushEvent(&tempEvent);
             }
+        }
+
+        if (!_debugMode) {
+            _main->_c8->emulateCycle();
         }
 
         // Rendering

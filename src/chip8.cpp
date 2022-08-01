@@ -11,7 +11,7 @@ Chip8::Chip8() {
     mem = new uint8_t [4096];
 
     // set registers and memory
-    reset();
+    unset();
 
     // Seeding the rng
     rng.seed(std::chrono::steady_clock().now().time_since_epoch().count()); // I love chrono Black Magic :)
@@ -34,6 +34,10 @@ void Chip8::reset() {
 
     memset(stack, 0, 2 * 16);
     memset(v, 0, 16);
+}
+
+void Chip8::unset() {
+    reset();
 
     // clear memory
     memset(mem, 0, 4096);

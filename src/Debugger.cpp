@@ -5,7 +5,6 @@
 #include <iostream>
 
 Debugger::Debugger(Chip8 *chip) : Window("Debugger", 600, 700, true) {
-    // createGLContext();
     _gui.create(this);
 
     _chip = chip;
@@ -62,13 +61,14 @@ void Debugger::render() {
         ImGui::EndTable();
     }
     
+
+    ImGui::Text("Controls");
     if (ImGui::Button("Emulate cycle")) {
         _chip->emulateCycle();
     }
 
-    if (ImGui::Button("reset")) {
-        _chip->reset();
-    }
+    if (ImGui::Button("reset")) { _chip->reset(); } ImGui::SameLine();
+    if (ImGui::Button("unset")) { _chip->unset(); }
 
     ImGui::End();
 

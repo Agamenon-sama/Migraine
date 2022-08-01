@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project("gui" VERSION 0.1)
+project("migraine" VERSION 0.1)
 
 # Set debug mode
 set(CMAKE_BUILD_TYPE Debug)
