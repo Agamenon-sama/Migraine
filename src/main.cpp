@@ -1,12 +1,18 @@
 #include <iostream>
 
 #include "Emulator.h"
+#include "Assembler/Assembler.h"
 
 static void usage(char *prog) {
     std::cerr << "Usage: " << prog << " [-d] <rom file>\n";
 }
 
 int main(int argc, char *argv[]) {
+    if (argc == 3 && (std::string(argv[1]) == "-a" || std::string(argv[1]) == "--assemble")) {
+        Assembler ass;
+        ass.assemble(argv[2]);
+        return 0;
+    }
     if (argc < 2 || argc >= 4) {
         usage(argv[0]);
         return 1;
