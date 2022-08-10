@@ -1,5 +1,8 @@
 #include "Assembler.h"
 
+#define SLOG_IMPLEMENTATION
+#include <slog/slog.h>
+
 #include <sstream>
 #include <iostream>
 #include <string.h>
@@ -13,11 +16,12 @@ Assembler::~Assembler() {
     delete [] _output;
 }
 
-void Assembler::assemble(std::string filename) {
+bool Assembler::assemble(std::string filename) {
     _filename = filename;
 
     if (!_readFile()) {
-        exit(1); // temp until I implement proper error handling
+        slog::error("Failed to open the assembly file");
+        return false;
     }
     _preparse(); // set label Table
 
@@ -45,7 +49,9 @@ void Assembler::assemble(std::string filename) {
                     addr = _labelTable[op1];
                 }
                 else {
-                    exit(2); // todo: implement proper errors
+                    slog::error("unrecognized symbol " + op1);
+                    slog::message(sline.str());
+                    return false;
                 }
             }
             opcode = 0x1000 | (addr & 0x0fff); // 0x1nnn
@@ -62,7 +68,9 @@ void Assembler::assemble(std::string filename) {
                     addr = _labelTable[op1];
                 }
                 else {
-                    exit(2); // todo: implement proper errors
+                    slog::error("unrecognized symbol " + op1);
+                    slog::message(sline.str());
+                    return false;
                 }
             }
             opcode = 0x2000 | (addr & 0x0fff); // 0x2nnn
@@ -73,10 +81,26 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg, val;
             if (op1[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg = std::stoi(op1.substr(1, 1), 0, 16);
-            val = std::stoi(op2);
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                val = std::stoi(op2);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x6000 | ((reg & 0x000f) << 8) | (val & 0x00ff); // 0x6xnn
             _writeOpcode(opcode);
         }
@@ -85,10 +109,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0x1; // 0x8xy1
             _writeOpcode(opcode);
         }
@@ -97,10 +130,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0x2; // 0x8xy2
             _writeOpcode(opcode);
         }
@@ -109,10 +151,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0x3; // 0x8xy3
             _writeOpcode(opcode);
         }
@@ -121,10 +172,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0x4; // 0x8xy4
             _writeOpcode(opcode);
         }
@@ -133,10 +193,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0x5; // 0x8xy5
             _writeOpcode(opcode);
         }
@@ -145,10 +214,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0x6; // 0x8xy6
             _writeOpcode(opcode);
         }
@@ -157,10 +235,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0x7; // 0x8xy7
             _writeOpcode(opcode);
         }
@@ -169,10 +256,19 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | 0xe; // 0x8xye
             _writeOpcode(opcode);
         }
@@ -181,16 +277,33 @@ void Assembler::assemble(std::string filename) {
             sline >> op2;
             int reg1, reg2;
             if(op1[0] != 'v' || op2[0] != 'v') {
-                // error
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
             }
-            reg1 = std::stoi(op1.substr(1, 1), 0, 16);
-            reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0x9000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4); // 0x9xy0
             _writeOpcode(opcode);
         }
         else if (mnem == "ldi") {
             sline >> op1;
-            int addr = std::stoi(op1);
+            int addr;
+            try {
+                addr = std::stoi(op1);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0xa000 | (addr & 0x0fff); // 0xannn
             _writeOpcode(opcode);
         }
@@ -199,8 +312,27 @@ void Assembler::assemble(std::string filename) {
             sline >> op1;
             sline >> op2;
             int reg, val;
-            reg = std::stoi(op1.substr(1, 1), 0, 16);
-            val = std::stoi(op2);
+            if(op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                val = std::stoi(op2);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
             opcode = 0xc000 | ((reg & 0xf) << 8) | val & 0xff;
             _writeOpcode(opcode);
         }
@@ -209,6 +341,8 @@ void Assembler::assemble(std::string filename) {
     if (!_writeOutput()) {
         std::cerr << "can't write binary file\n";
     }
+
+    return true;
 }
 
 inline void Assembler::_writeOpcode(uint16_t opcode) {
@@ -267,7 +401,8 @@ void Assembler::_preparse() {
 
         std::string firstWord = line.substr(0, line.find(" "));
         if (firstWord.size() <= 1) {
-            // todo: implement unvalid line handler
+            slog::warning("invalid line");
+            slog::message(line);
         }
         else if (firstWord[firstWord.size() - 1] == ':') {
             _labelTable[firstWord.substr(0, firstWord.size() - 1)] = lineNum * 2 + 0x200;

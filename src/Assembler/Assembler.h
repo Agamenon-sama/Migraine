@@ -9,7 +9,7 @@ class Assembler {
     Assembler();
     ~Assembler();
 
-    void assemble(std::string filename);
+    bool assemble(std::string filename);
 
     private:
     std::string _filename;

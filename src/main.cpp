@@ -10,8 +10,7 @@ static void usage(char *prog) {
 int main(int argc, char *argv[]) {
     if (argc == 3 && (std::string(argv[1]) == "-a" || std::string(argv[1]) == "--assemble")) {
         Assembler ass;
-        ass.assemble(argv[2]);
-        return 0;
+        return (ass.assemble(argv[2]) ? 0 : 2);
     }
     if (argc < 2 || argc >= 4) {
         usage(argv[0]);
