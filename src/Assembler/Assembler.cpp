@@ -36,13 +36,35 @@ void Assembler::assemble(std::string filename) {
         sline >> mnem;
         if (mnem == "jmp") {
             sline >> op1;
-            int addr = std::stoi(op1);
+            int addr;
+            try {
+                addr = std::stoi(op1);
+            }
+            catch (std::exception &e) {
+                if (_labelTable.find(op1) != _labelTable.end()) {
+                    addr = _labelTable[op1];
+                }
+                else {
+                    exit(2); // todo: implement proper errors
+                }
+            }
             opcode = 0x1000 | (addr & 0x0fff); // 0x1nnn
             _writeOpcode(opcode);
         }
         else if (mnem == "call") {
             sline >> op1;
-            int addr = std::stoi(op1);
+            int addr;
+            try {
+                addr = std::stoi(op1);
+            }
+            catch (std::exception &e) {
+                if (_labelTable.find(op1) != _labelTable.end()) {
+                    addr = _labelTable[op1];
+                }
+                else {
+                    exit(2); // todo: implement proper errors
+                }
+            }
             opcode = 0x2000 | (addr & 0x0fff); // 0x2nnn
             _writeOpcode(opcode);
         }
@@ -248,7 +270,7 @@ void Assembler::_preparse() {
             // todo: implement unvalid line handler
         }
         else if (firstWord[firstWord.size() - 1] == ':') {
-            _labelTable[firstWord.substr(0, firstWord.size() - 1)] = lineNum * 2;
+            _labelTable[firstWord.substr(0, firstWord.size() - 1)] = lineNum * 2 + 0x200;
         }
         else {
             lineNum++;

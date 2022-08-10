@@ -11,7 +11,8 @@ So I'm tempted to call this project a train wreck at this point :(
 - The emulator is not functional
 - The renderer for the emulator screen has been totally commented out because it just needs to be rewritten fully
 - The debugger is still very behind
-- The assembler and the compiler are still just dreams for now
+- The assembler is being worked on
+- The compiler is still just a dream for now
 
 The road is still very long but I'll make it work (or so I want to believe)
 
