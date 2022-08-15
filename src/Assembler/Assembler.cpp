@@ -33,12 +33,21 @@ bool Assembler::assemble(std::string filename) {
     std::string mnem;
     std::string op1;
     std::string op2;
+    std::string op3;
 
     while (std::getline(src, line)) {
         std::stringstream sline;
         sline.str(line);
         sline >> mnem;
-        if (mnem == "jmp") {
+        if (mnem == "cls") {
+            opcode = 0x00e0; // 0x00e0
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "ret") {
+            opcode = 0x00ee; // 0x00ee
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "jmp") {
             sline >> op1;
             int addr;
             try {
@@ -49,7 +58,7 @@ bool Assembler::assemble(std::string filename) {
                     addr = _labelTable[op1];
                 }
                 else {
-                    slog::error("unrecognized symbol " + op1);
+                    slog::error("unrecognized symbol: " + op1);
                     slog::message(sline.str());
                     return false;
                 }
@@ -68,12 +77,89 @@ bool Assembler::assemble(std::string filename) {
                     addr = _labelTable[op1];
                 }
                 else {
-                    slog::error("unrecognized symbol " + op1);
+                    slog::error("unrecognized symbol: " + op1);
                     slog::message(sline.str());
                     return false;
                 }
             }
             opcode = 0x2000 | (addr & 0x0fff); // 0x2nnn
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "se") {
+            sline >> op1;
+            sline >> op2;
+            int reg, val;
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                val = std::stoi(op2);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
+            opcode = 0x3000 | ((reg & 0x000f) << 8) | (val & 0x00ff); // 0x3xnn
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "sne") {
+            sline >> op1;
+            sline >> op2;
+            int reg, val;
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                val = std::stoi(op2);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
+            opcode = 0x4000 | ((reg & 0x000f) << 8) | (val & 0x00ff); // 0x4xnn
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "sev") {
+            sline >> op1;
+            sline >> op2;
+            int reg1, reg2;
+            if(op1[0] != 'v' || op2[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            opcode = 0x5000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4); // 0x5xy0
             _writeOpcode(opcode);
         }
         else if (mnem == "ld") {
@@ -102,6 +188,55 @@ bool Assembler::assemble(std::string filename) {
                 return false;
             }
             opcode = 0x6000 | ((reg & 0x000f) << 8) | (val & 0x00ff); // 0x6xnn
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "addv") {
+            sline >> op1;
+            sline >> op2;
+            int reg, val;
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                val = std::stoi(op2);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
+            opcode = 0x7000 | ((reg & 0x000f) << 8) | (val & 0x00ff); // 0x7xnn
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "ldv") {
+            sline >> op1;
+            sline >> op2;
+            int reg1, reg2;
+            if(op1[0] != 'v' || op2[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            opcode = 0x8000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4); // 0x8xy0
             _writeOpcode(opcode);
         }
         else if (mnem == "or") {
@@ -307,7 +442,20 @@ bool Assembler::assemble(std::string filename) {
             opcode = 0xa000 | (addr & 0x0fff); // 0xannn
             _writeOpcode(opcode);
         }
-        else if (mnem == "") {}
+        else if (mnem == "jmpv") {
+            sline >> op1;
+            int addr;
+            try {
+                addr = std::stoi(op1);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
+            opcode = 0xb000 | (addr & 0x0fff); // 0xbnnn
+            _writeOpcode(opcode);
+        }
         else if (mnem == "rnd") {
             sline >> op1;
             sline >> op2;
@@ -333,13 +481,281 @@ bool Assembler::assemble(std::string filename) {
                 slog::message(sline.str());
                 return false;
             }
-            opcode = 0xc000 | ((reg & 0xf) << 8) | val & 0xff;
+            opcode = 0xc000 | ((reg & 0xf) << 8) | val & 0xff; // 0xcxy0
             _writeOpcode(opcode);
+        }
+        else if (mnem == "drw") {
+            sline >> op1;
+            sline >> op2;
+            sline >> op3;
+            int reg1, reg2, val;
+
+            if(op1[0] != 'v' || op2[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg1 = std::stoi(op1.substr(1, 1), 0, 16);
+                reg2 = std::stoi(op2.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                val = std::stoi(op3);
+            }
+            catch (std::exception &e) {
+                slog::error("expected a number literal");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xd000 | ((reg1 & 0xf) << 8) | ((reg2 & 0xf) << 4) | val & 0xf; // 0xdxyn
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "kpr") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xe000 | ((reg & 0xf) << 8) | 0x009e; // 0xex9e
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "knpr") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xe000 | ((reg & 0xf) << 8) | 0x00a1; // 0xexa1
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "gdt") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x0007; // 0xfx07
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "gkpr") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x000a; // 0xfx0a
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "sdt") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x0015; // 0xfx15
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "sst") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x0018; // 0xfx18
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "addi") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x001e; // 0xfx1e
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "lds") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x0029; // 0xfx29
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "bcd") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x0033; // 0xfx33
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "regd") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x0055; // 0xfx55
+            _writeOpcode(opcode);
+        }
+        else if (mnem == "regl") {
+            sline >> op1;
+            int reg;
+
+            if (op1[0] != 'v') {
+                slog::error("expected a register");
+                slog::message(sline.str());
+                return false;
+            }
+            try {
+                reg = std::stoi(op1.substr(1, 1), 0, 16);
+            }
+            catch (std::exception &e) {
+                slog::error("invalid register number");
+                slog::message(sline.str());
+                return false;
+            }
+
+            opcode = 0xf000 | ((reg & 0xf) << 8) | 0x0065; // 0xfx65
+            _writeOpcode(opcode);
+        }
+        else {
+            slog::error("invalid mnemonic" + mnem);
+            return false;
         }
     }
 
     if (!_writeOutput()) {
-        std::cerr << "can't write binary file\n";
+        slog::error("can't write binary file");
+        return false;
     }
 
     return true;
