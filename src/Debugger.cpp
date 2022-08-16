@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include <iostream>
+#include <fstream>
 
 Debugger::Debugger(Chip8 *chip) : Window("Debugger", 600, 700, true) {
     _gui.create(this);
@@ -69,6 +70,42 @@ void Debugger::render() {
 
     if (ImGui::Button("reset")) { _chip->reset(); } ImGui::SameLine();
     if (ImGui::Button("unset")) { _chip->unset(); }
+
+    ImGui::End();
+
+    ImGui::Begin("Disassembly");
+
+    char filename[64] = "";
+    ImGui::InputText("file name", filename, 64); // FIXME: this is not reading the file name
+
+    if (ImGui::Button("disassemble rom")) {
+        _assemblyCode = _disassembler.disassemble(_chip->mem);
+    } ImGui::SameLine();
+    if (ImGui::Button("save disassembled code")) {
+        std::fstream file(filename, std::ios::out);
+        if (!file.is_open()) {
+            _assemblyCode = "Failed to write the file " + std::string(filename);
+        }
+
+        file.write(_assemblyCode.c_str(), _assemblyCode.size());
+    } ImGui::SameLine();
+    if (ImGui::Button("load assembly source")) {
+        std::fstream file(filename, std::ios::in);
+        if (!file.is_open()) {
+            _assemblyCode = "Failed to read the file " + std::string(filename);
+        }
+
+        file.seekg(0, std::ios::end);
+        int size = file.tellg();
+        file.seekg(0);
+
+        char *buff = new char[size];
+        file.read(buff, size);
+        _assemblyCode = buff;
+        delete [] buff;
+    }
+
+    ImGui::TextWrapped("%s", _assemblyCode.c_str());
 
     ImGui::End();
 
