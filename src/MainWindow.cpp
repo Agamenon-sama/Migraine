@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 
 MainWindow::MainWindow(const std::string &path) : Window("Insert title later", 800, 600) {
-    _c8 = new Chip8();
     _renderer = new Renderer(_window);
+    _c8 = new Chip8(_renderer);
     _c8->load(path);
 }
 

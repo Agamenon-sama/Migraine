@@ -4,7 +4,7 @@
 
 #include "chip8.h"
 
-Chip8::Chip8() {
+Chip8::Chip8(Renderer *renderer) {
     // allocating memory
     stack = new uint16_t [16];
     v = new uint8_t [16];
@@ -15,6 +15,7 @@ Chip8::Chip8() {
 
     // Seeding the rng
     rng.seed(std::chrono::steady_clock().now().time_since_epoch().count()); // I love chrono Black Magic :)
+    _renderer = renderer;
 }
 
 Chip8::~Chip8() {
@@ -61,22 +62,22 @@ bool Chip8::load(const std::string &path) {
     
     // Loading font set;
     uint8_t fontset[80] = { 
-      0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-      0x20, 0x60, 0x20, 0x20, 0x70, // 1
-      0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-      0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-      0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-      0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-      0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-      0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-      0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-      0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-      0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-      0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-      0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-      0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-      0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-      0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
     for(uint8_t pixelIndex = 0; pixelIndex < 80; pixelIndex++) {
@@ -85,25 +86,15 @@ bool Chip8::load(const std::string &path) {
     return true;
 }
 
-bool Chip8::dumpMem() {
-    std::cout << std::hex;
-    for(uint16_t j = 0x200; j <= 4096; j++) {
-        std::cout << mem[j]; // << "\t";
-    }
-    std::cout << std::endl;
-    return true;
-}
-
-static void unvalidOpcode(uint16_t opcode) {
+static void invalidOpcode(uint16_t opcode) {
     std::cerr << std::hex << "opcode " << opcode << " is undefined\n";
-    // chip->dumpMem(); todo: fix
     exit(1);
 }
 
 void Chip8::emulateCycle() {
     int i;
     uint8_t x, y, n;
-    uint8_t kk;
+    uint8_t nn;
     uint16_t nnn;
 
     // fetch
@@ -111,220 +102,184 @@ void Chip8::emulateCycle() {
     x   = (opcode >> 8) & 0x000F; // the lower 4 bits of the high byte
     y   = (opcode >> 4) & 0x000F; // the upper 4 bits of the low byte
     n   = opcode & 0x000F; // the lowest 4 bits
-    kk  = opcode & 0x00FF; // the lowest 8 bits
+    nn  = opcode & 0x00FF; // the lowest 8 bits
     nnn = opcode & 0x0FFF; // the lowest 12 bits
 
     // decode & execute: case on the highest order byte
     switch (opcode & 0xF000) {
         case 0x0000:
-            switch (kk) {
+            switch (nn) {
                 case 0x00E0: // clear the screen
-                    // p("Clear the screen\n");
-                    // memset(gfx, 0, sizeof(uint8_t) * GFX_SIZE);
                     // chip8_draw_flag = true;
-                    // renderer->clear(); todo: fix
+                    _renderer->clear();
                     pc += 2;
                     break;
                 case 0x00EE: // ret
-                    // p("ret\n");
-                    pc = stack[--sp];
+                    sp--;
+                    pc = stack[sp];
                     break;
                 default:
-                    unvalidOpcode(opcode);
+                    invalidOpcode(opcode);
             }
             break;
         case 0x1000: // 1nnn: jump to address nnn
-            // p("Jump to address 0x%x\n", nnn);
             pc = nnn;
             break;
         case 0x2000: // 2nnn: call address nnn
-            // p("Call address 0x%x\n", nnn);
-            stack[sp++] = pc + 2;
+            stack[sp] = pc + 2;
+            sp++;
             pc = nnn;
             break;
-        case 0x3000: // 3xkk: skip next instr if v[x] = kk
-            // p("Skip next instruction if 0x%x == 0x%x\n", v[x], kk);
-            pc += (v[x] == kk) ? 4 : 2;
+        case 0x3000: // 3xnn: skip next instr if v[x] = nn
+            pc += (v[x] == nn) ? 4 : 2;
             break;
-        case 0x4000: // 4xkk: skip next instr if v[x] != kk
-            // p("Skip next instruction if 0x%x != 0x%x\n", v[x], kk);
-            pc += (v[x] != kk) ? 4 : 2;
+        case 0x4000: // 4xnn: skip next instr if v[x] != nn
+            pc += (v[x] != nn) ? 4 : 2;
             break;
         case 0x5000: // 5xy0: skip next instr if v[x] == v[y]
-            // p("Skip next instruction if 0x%x == 0x%x\n", v[x], v[y]);
             pc += (v[x] == v[y]) ? 4 : 2;
             break;
-        case 0x6000: // 6xkk: set v[x] = kk
-            // p("Set v[0x%x] to 0x%x\n", x, kk);
-            v[x] = kk;
+        case 0x6000: // 6xnn: set v[x] = nn
+            v[x] = nn;
             pc += 2;
             break;
-        case 0x7000: // 7xkk: set v[x] = v[x] + kk
-            // p("Set v[0x%d] to v[0x%d] + 0x%x\n", x, x, kk);
-            v[x] += kk;
+        case 0x7000: // 7xnn: set v[x] = v[x] + nn
+            v[x] += nn;
             pc += 2;
             break;
         case 0x8000: // 8xyn: Arithmetic stuff
             switch (n) {
                 case 0x0:
-                    // p("v[0x%x] = v[0x%x] = 0x%x\n", x, y, v[y]);
                     v[x] = v[y];
                     break;
-                case 0x1:
-                    // p("v[0x%x] |= v[0x%x] = 0x%x\n", x, y, v[y]);
+                case 0x1: // or
                     v[x] = v[x] | v[y];
                     break;
-                case 0x2:
-                    // p("v[0x%x] &= v[0x%x] = 0x%x\n", x, y, v[y]);
+                case 0x2: // and
                     v[x] = v[x] & v[y];
                     break;
-                case 0x3:
-                    // p("v[0x%x] ^= v[0x%x] = 0x%x\n", x, y, v[y]);
+                case 0x3: // xor
                     v[x] = v[x] ^ v[y];
                     break;
                 case 0x4:
-                    // p("v[0x%x] = v[0x%x] + v[0x%x] = 0x%x + 0x%x\n", x, x, y, v[x], v[y]);
                     v[0xF] = ((int) v[x] + (int) v[y]) > 255 ? 1 : 0;
                     v[x] = v[x] + v[y];
                     break;
                 case 0x5: 
-                    // p("v[0x%x] = v[0x%x] - v[0x%x] = 0x%x - 0x%x\n", x, x, y, v[x], v[y]);
                     v[0xF] = (v[x] > v[y]) ? 1 : 0;
                     v[x] = v[x] - v[y];
                     break;
                 case 0x6:
-                    // p("v[0x%x] = v[0x%x] >> 1 = 0x%x >> 1\n", x, x, v[x]);
                     v[0xF] = v[x] & 0x1;
                     v[x] = (v[x] >> 1);
                     break;
                 case 0x7:
-                    // p("v[0x%x] = v[0x%x] - v[0x%x] = 0x%x - 0x%x\n", x, y, x, v[y], v[x]);
                     v[0xF] = (v[y] > v[x]) ? 1 : 0;
                     v[x] = v[y] - v[x];
                     break;
                 case 0xE:
-                    // p("v[0x%x] = v[0x%x] << 1 = 0x%x << 1\n", x, x, v[x]);
                     v[0xF] = (v[x] >> 7) & 0x1;
                     v[x] = (v[x] << 1);
                     break;
                 default:
-                    unvalidOpcode(opcode);
+                    invalidOpcode(opcode);
             }
             pc += 2;
             break;
         case 0x9000: // 9xy0: skip instruction if Vx != Vy
             switch (n) {
                 case 0x0:
-                    // p("Skip next instruction if 0x%x != 0x%x\n", v[x], v[y]);
                     pc += (v[x] != v[y]) ? 4 : 2;
                     break;
                 default:
-                    unvalidOpcode(opcode);
+                    invalidOpcode(opcode);
             }
             break;
         case 0xA000: // Annn: set I to address nnn
-            // p("Set I to 0x%x\n", nnn);
             i = nnn;
             pc += 2;
             break;
         case 0xB000: // Bnnn: jump to location nnn + v[0]
-            // p("Jump to 0x%x + v[0] (0x%x)\n", nnn, v[0]);
             pc = nnn + v[0];
             break;
-        case 0xC000: // Cxkk: v[x] = random byte AND kk
-            // p("v[0x%x] = random byte\n", x);
-            v[x] = kk & (rng() % 256);
+        case 0xC000: // Cxnn: v[x] = random byte AND nn
+            v[x] = nn & (rng() % 256);
             pc += 2;
             break;
         case 0xD000: // Dxyn: Display an n-byte sprite starting at memory
                      // location I at (Vx, Vy) on the screen, VF = collision
-            // p("Draw sprite at (v[0x%x], v[0x%x]) = (0x%x, 0x%x) of height %d", 
             //  x, y, v[x], v[y], n);
-            // draw_sprite(v[x], v[y], n);
             // renderer->render(v[x], v[y], n); todo: fix
             pc += 2;
             // chip8_draw_flag = true;
             break;
         case 0xE000: // key-pressed events
-            switch (kk) {
+            switch (nn) {
                 case 0x9E: // skip next instr if key[Vx] is pressed
-                    // p("Skip next instruction if key[%d] is pressed\n", x);
-                    // pc += (key[v[x]]) ? 4 : 2;
+                    // todo: implement when I implement input handling
                     break;
                 case 0xA1: // skip next instr if key[Vx] is not pressed
-                    // p("Skip next instruction if key[%d] is NOT pressed\n", x);
-                    // pc += (!key[v[x]]) ? 4 : 2;
+                    // todo: implement when I implement input handling
                     break;
                 default:
-                    unvalidOpcode(opcode);
+                    invalidOpcode(opcode);
             }
             break;
         case 0xF000: // misc
-            switch (kk) {
+            switch (nn) {
                 case 0x07:
-                    // p("v[0x%x] = delay timer = %d\n", x, delay_timer);
-                    // v[x] = delay_timer;
+                    v[x] = delayTimer;
                     pc += 2;
                     break;
                 case 0x0A:
-                    // i = 0;
-                    // printf("Wait for key instruction\n");
-                    // while (true) {
-                    //     for (i = 0; i < KEY_SIZE; i++) {
-                    //         if (key[i]) {
-                    //             v[x] = i;
-                    //             goto got_key_press;
-                    //         }
-                    //     }
-                    // }
-                    // got_key_press:
+                    // todo:
                     pc += 2;
                     break;
                 case 0x15:
-                    // p("delay timer = v[0x%x] = %d\n", x, v[x]);
-                    // delay_timer = v[x];
+                    delayTimer = v[x];
                     pc += 2;
                     break;
                 case 0x18:
-                    // p("sound timer = v[0x%x] = %d\n", x, v[x]);
-                    // sound_timer = v[x];
+                    soundTimer = v[x];
                     pc += 2;
                     break;
                 case 0x1E:
-                    // p("I = I + v[0x%x] = 0x%x + 0x%x\n", x, I, v[x]);
-                    v[0xF] = (i + v[x] > 0xfff) ? 1 : 0;
-                    i = i + v[x];
+                    i += v[x];
                     pc += 2;
                     break;
                 case 0x29:
-                    // p("I = location of font for character v[0x%x] = 0x%x\n", x, v[x]);
-                    // I = FONTSET_BYTES_PER_CHAR * v[x];
+                    i = v[x] * 5; // 5 is the size of each character sprite in memory
                     pc += 2;
                     break;
                 case 0x33:
-                    // p("Store BCD for %d starting at address 0x%x\n", v[x], I);
-                    mem[i]   = (v[x] % 1000) / 100; // hundred's digit
-                    mem[i+1] = (v[x] % 100) / 10;   // ten's digit
-                    mem[i+2] = (v[x] % 10);         // one's digit
+                    mem[i]   = (v[x] % 1000) / 100; // hundreds
+                    mem[i+1] = (v[x] % 100) / 10;   // tens
+                    mem[i+2] = (v[x] % 10);         // ones
                     pc += 2;
                     break;
                 case 0x55:
-                    // p("Copy sprite from registers 0 to 0x%x into memory at address 0x%x\n", x, I);
-                    for (i = 0; i <= x; i++) { mem[i + i] = v[i]; }
-                    i += x + 1;
+                    for (int j = 0; j <= x; j++) {
+                        mem[i + j] = v[j];
+                    }
+                    // apparently different chip8 implementations behave differently
+                    // when it comes to whether you increment i or not
+                    // I guess that by default, I won't increment as that's the most modern way
+                    // todo: implement a setting to configure this behaviour by the user
+                    // i += x + 1;
                     pc += 2;
                     break;
                 case 0x65:
-                    // p("Copy sprite from memory at address 0x%x into registers 0 to 0x%x\n", x, I);
-                    for (i = 0; i <= x; i++) { v[i] = mem[i + i]; }
-                    i += x + 1;
+                    for (int j = 0; j <= x; j++) {
+                        v[j] = mem[i + j];
+                    }
+                    // i += x + 1;
                     pc += 2;
                     break;
                 default:
-                    unvalidOpcode(opcode);
+                    invalidOpcode(opcode);
             }
             break;
         default:
-            unvalidOpcode(opcode);
-}
+            invalidOpcode(opcode);
+    }
 }

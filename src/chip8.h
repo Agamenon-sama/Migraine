@@ -6,15 +6,16 @@
 #include <random>
 #include <chrono>
 
+#include "Renderer.h"
+
 class Chip8 {
-public:
-    Chip8();
+    public:
+    Chip8(Renderer *renderer);
     ~Chip8();
 
     bool load(const std::string &path);
     void reset();
     void unset();
-    bool dumpMem();
     void emulateCycle();
 
 
@@ -31,6 +32,6 @@ public:
 
     std::mt19937 rng;
 
-private:
-        
+    private:
+    Renderer *_renderer;
 };

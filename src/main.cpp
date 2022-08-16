@@ -4,7 +4,9 @@
 #include "Assembler/Assembler.h"
 
 static void usage(char *prog) {
-    std::cerr << "Usage: " << prog << " [-d] <rom file>\n";
+    std::cerr << "Usage: " << prog << " [OPTION] <file>\n";
+    std::cerr << "\t-d: lauch emulator in debug mode\n";
+    std::cerr << "\t-a, --assemble: assemble assembly file\n";
 }
 
 int main(int argc, char *argv[]) {
