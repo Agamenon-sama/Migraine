@@ -4,24 +4,133 @@
 
 #include <random>
 #include <chrono>
+#include <iostream>
 
 std::mt19937 rng(std::chrono::steady_clock().now().time_since_epoch().count());
 
 Renderer::Renderer(SDL_Window *window) {
     // _renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     // drawFlag = false;
-    // for(int i = 0; i < 32; i++) {
-    //     for(int j = 0; j < 64; j++) {
-    //         _frameMap[i][j] = 0; //rng() & 1; // setting the map to random noise
-    //     }
-    // }
+    for(int i = 0; i < 64; i++) {
+        for(int j = 0; j < 32; j++) {
+            _frameMap[i][j] = 0; //rng() & 1; // setting the map to random noise
+        }
+    }
+
+    // opengl buffers
+    float vertices[6*4] = {
+        // position   // texture coord
+         1.0f,  1.0f, 1.0f, 1.0f, // top right
+        -1.0f,  1.0f, 0.0f, 1.0f, // top left
+        -1.0f, -1.0f, 0.0f, 0.0f, // bot left
+
+         1.0f,  1.0f, 1.0f, 1.0f, // top right
+        -1.0f, -1.0f, 0.0f, 0.0f, // bot left
+         1.0f, -1.0f, 1.0f, 0.0f  // bot right
+    };
+
+    glGenVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
+
+    glGenBuffers(1, &_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0); // pos
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)0);
+    glEnableVertexAttribArray(1); // texCoord
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (const void*)(2 * sizeof(float)));
+
+    // opengl texture
+    _image = new uint8_t[64 * 32 * 3];
+    // todo: the following is just for test. remove it later
+    memset(_image, 0, 64*32*3);
+    _image[0*3] = 255; _image[0*3 + 1] = 255; _image[0*3 + 2] = 255;
+    _image[100*3] = 255; _image[100*3 + 1] = 255; _image[100*3 + 2] = 255;
+    _image[200*3] = 255; _image[200*3 + 1] = 255; _image[200*3 + 2] = 255;
+
+    glGenTextures(1, &_texture);
+    glBindTexture(GL_TEXTURE_2D, _texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, _image);
+
+    // shader
+    const char *vertexSource = R"(
+        #version 330 core
+
+        layout (location = 0) in vec2 aPos;
+        layout (location = 1) in vec2 aTexCoord;
+
+        out vec2 texCoord;
+
+        void main() {
+            texCoord = aTexCoord;
+            gl_Position = vec4(aPos, 1.0f, 1.0f);
+        }
+    )";
+    const char *fragmentSource = R"(
+        #version 330 core
+
+        out vec4 fragColor;
+
+        in vec2 texCoord;
+
+        uniform sampler2D uTex;
+
+        void main() {
+            fragColor = texture(uTex, texCoord);
+        }
+    )";
+
+    uint32_t vertexShader, fragmentShader;
+    int success;
+    char buildLog[512];
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexSource, nullptr);
+    glCompileShader(vertexShader);
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, nullptr, buildLog);
+        std::cerr << "Vertex shader build error:\n" << buildLog << "\n";
+    }
+
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentSource, nullptr);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, nullptr, buildLog);
+        std::cerr << "Fragment shader build error:\n" << buildLog << "\n";
+    }
+
+    _shader = glCreateProgram();
+    glAttachShader(_shader, vertexShader);
+    glAttachShader(_shader, fragmentShader);
+    glLinkProgram(_shader);
+    glGetShaderiv(_shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(_shader, 512, nullptr, buildLog);
+        std::cerr << "Shader link error:\n" << buildLog << "\n";
+    }
+
+    glDetachShader(_shader, vertexShader);
+    glDeleteShader(vertexShader);
+    glDetachShader(_shader, fragmentShader);
+    glDeleteShader(fragmentShader);
 }
 
 Renderer::~Renderer() {
-    // SDL_DestroyRenderer(_renderer);
+    delete _image;
+    glDeleteProgram(_shader);
+    glDeleteTextures(1, &_texture);
+    glDeleteBuffers(1, &_vbo);
 }
 
-void Renderer::render(const uint8_t x, const uint8_t y, const uint8_t n) {
+void Renderer::setFrameMap(const uint8_t x, const uint8_t y, const uint8_t n) {
     // chip->v[0xF] = 0; // init to 0 todo: fix
     // todo: I really need to recheck this. I'm sure it's wrong
     // for(uint8_t row = 0; row < n; row++) {
@@ -37,7 +146,7 @@ void Renderer::render(const uint8_t x, const uint8_t y, const uint8_t n) {
             // *pixel = *pixel ^ bit;
         // }
     // }
-    draw();
+    // draw();
 }
 
 /*void Renderer::render(const uint8_t x, const uint8_t y, const uint8_t n) {
@@ -84,9 +193,16 @@ void Renderer::clear() {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Renderer::draw() {
+void Renderer::render() {
     // Clearing the frame buffer
     clear();
+
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glUseProgram(_shader);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _texture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Drawing pixels
     // SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0xff);

@@ -209,7 +209,7 @@ void Chip8::emulateCycle() {
         case 0xD000: // Dxyn: Display an n-byte sprite starting at memory
                      // location I at (Vx, Vy) on the screen, VF = collision
             //  x, y, v[x], v[y], n);
-            // renderer->render(v[x], v[y], n); todo: fix
+            _renderer->setFrameMap(v[x], v[y], n); // todo: fix
             pc += 2;
             // chip8_draw_flag = true;
             break;

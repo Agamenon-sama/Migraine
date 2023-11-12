@@ -20,12 +20,6 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
     _main  = new MainWindow(path);
     _debug = new Debugger(_main->_c8);
     _debugMode = debugMode;
-
-    // Load OpenGL. NEVER FORGET TO LOAD OpenGL
-    if (!gladLoadGLLoader(((GLADloadproc) SDL_GL_GetProcAddress))) {
-        std::cerr << "Failed to load OpenGL\n";
-        exit(1);
-    }
 }
 
 Emulator::~Emulator() {

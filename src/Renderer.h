@@ -8,13 +8,16 @@ public:
     ~Renderer();
 
     void clear();
-    void render(const uint8_t x, const uint8_t y, const uint8_t n);
-    void draw();
+    void setFrameMap(const uint8_t x, const uint8_t y, const uint8_t n);
+    void render();
     void swapBuff(SDL_Window *win);
 
-    // bool drawFlag;
 private:
-    // SDL_Renderer *_renderer;
-    uint8_t _frameMap[32][64];
+    uint8_t _frameMap[64][32];
+    uint8_t *_image;
+    uint32_t _vao;
+    uint32_t _vbo;
+    uint32_t _texture;
+    uint32_t _shader;
 };
 
