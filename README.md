@@ -8,10 +8,8 @@ It's called Migraine because trust me, this project is a real headache
 
 ## Status
 
-So I'm tempted to call this project a train wreck at this point :(
-
-- The emulator is still not functional
-- The renderer for the emulator screen should be fine but some programs still don't render correctly. I assume it's not a renderer issue but I'm still not sure
+- The emulator is mostly functional but still lacks some important
+- The renderer for the emulator screen is good but could benefit from more tweaks
 - The debugger is half ok
 - The assembler is half ok
 - The disassembler is still in very early stages

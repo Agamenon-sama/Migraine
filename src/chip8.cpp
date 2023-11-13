@@ -108,7 +108,6 @@ static void invalidOpcode(uint16_t opcode) {
 }
 
 void Chip8::emulateCycle() {
-    int i;
     uint8_t x, y, n;
     uint8_t nn;
     uint16_t nnn;
@@ -279,6 +278,7 @@ void Chip8::emulateCycle() {
                     pc += 2;
                     break;
                 case 0x1E:
+                    v[0xf] = (i + v[x] > 0xfff) ? 1 : 0;
                     i += v[x];
                     pc += 2;
                     break;
