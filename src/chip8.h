@@ -6,11 +6,10 @@
 #include <random>
 #include <chrono>
 
-#include "Renderer.h"
-
 class Chip8 {
-    public:
-    Chip8(Renderer *renderer);
+public:
+    // Chip8(Renderer *renderer);
+    Chip8();
     ~Chip8();
 
     bool load(const std::string &path);
@@ -32,6 +31,10 @@ class Chip8 {
 
     std::mt19937 rng;
 
-    private:
-    Renderer *_renderer;
+    uint8_t _frameBuffer[32][64];
+
+private:
+    // Renderer *_renderer;
+    
+    void _clearFrameBuffer();
 };

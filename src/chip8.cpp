@@ -4,7 +4,8 @@
 
 #include "chip8.h"
 
-Chip8::Chip8(Renderer *renderer) {
+// Chip8::Chip8(Renderer *renderer) {
+Chip8::Chip8() {
     // allocating memory
     stack = new uint16_t [16];
     v = new uint8_t [16];
@@ -15,13 +16,24 @@ Chip8::Chip8(Renderer *renderer) {
 
     // Seeding the rng
     rng.seed(std::chrono::steady_clock().now().time_since_epoch().count()); // I love chrono Black Magic :)
-    _renderer = renderer;
+    // _renderer = renderer;
+
+    // init framebuffer
+    _clearFrameBuffer();
 }
 
 Chip8::~Chip8() {
     delete [] stack;
     delete [] v;
     delete [] mem;
+}
+
+void Chip8::_clearFrameBuffer() {
+    for (int y = 0; y < 32; y++) {
+        for (int x = 0; x < 64; x++) {
+            _frameBuffer[y][x] = 0;
+        }
+    }
 }
 
 void Chip8::reset() {
@@ -35,6 +47,8 @@ void Chip8::reset() {
 
     memset(stack, 0, 2 * 16);
     memset(v, 0, 16);
+
+    _clearFrameBuffer();
 }
 
 void Chip8::unset() {
@@ -42,6 +56,8 @@ void Chip8::unset() {
 
     // clear memory
     memset(mem, 0, 4096);
+
+    _clearFrameBuffer();
 }
 
 bool Chip8::load(const std::string &path) {
@@ -111,7 +127,8 @@ void Chip8::emulateCycle() {
             switch (nn) {
                 case 0x00E0: // clear the screen
                     // chip8_draw_flag = true;
-                    _renderer->clear();
+                    // _renderer->clear();
+                    _clearFrameBuffer();
                     pc += 2;
                     break;
                 case 0x00EE: // ret
@@ -209,7 +226,25 @@ void Chip8::emulateCycle() {
         case 0xD000: // Dxyn: Display an n-byte sprite starting at memory
                      // location I at (Vx, Vy) on the screen, VF = collision
             //  x, y, v[x], v[y], n);
-            _renderer->setFrameMap(v[x], v[y], n); // todo: fix
+            // _renderer->setFrameMap(v[x], v[y], n); // todo: fix
+            v[0xf] = 0;
+            for (int row = 0; row < n; row++) {
+                uint8_t sprite = mem[i + row];
+
+                for (int column = 0; column < 8; column++) {
+                    uint8_t spritePixel = sprite & (0x80 >> column);
+                    uint8_t *screenPixel = &_frameBuffer[v[y] + row][v[x] + column];
+
+                    if (spritePixel) { // if we have to draw, we draw
+                        if (*screenPixel) { // but before modifying the screen, we test for collision
+                            v[0xf] = 1;
+                        }
+                        // draw
+                        *screenPixel ^= 1;
+                    }
+                }
+            }
+
             pc += 2;
             // chip8_draw_flag = true;
             break;

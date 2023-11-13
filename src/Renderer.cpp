@@ -8,14 +8,8 @@
 
 std::mt19937 rng(std::chrono::steady_clock().now().time_since_epoch().count());
 
-Renderer::Renderer(SDL_Window *window) {
-    // _renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    // drawFlag = false;
-    for(int i = 0; i < 64; i++) {
-        for(int j = 0; j < 32; j++) {
-            _frameMap[i][j] = 0; //rng() & 1; // setting the map to random noise
-        }
-    }
+Renderer::Renderer(SDL_Window *window, Chip8 *chip8) {
+    _chip8 = chip8;
 
     // opengl buffers
     float vertices[6*4] = {
@@ -197,11 +191,25 @@ void Renderer::render() {
     // Clearing the frame buffer
     clear();
 
+    for (int y = 0; y < 32; y++) {
+        for (int x = 0; x < 64; x++) {
+            uint8_t pixel = _chip8->_frameBuffer[y][x] ? 255 : 0;
+            // uint8_t pixel = rng() % 255;
+            _image[((31 - y)*64 + x) * 3] = pixel;
+            _image[((31 - y)*64 + x) * 3 + 1] = pixel;
+            _image[((31 - y)*64 + x) * 3 + 2] = pixel;
+        }
+    }
+
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
     glUseProgram(_shader);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, _image);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Drawing pixels

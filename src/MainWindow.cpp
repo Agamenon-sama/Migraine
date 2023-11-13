@@ -9,8 +9,8 @@ MainWindow::MainWindow(const std::string &path) : Window("Insert title later", 6
         exit(1);
     }
 
-    _renderer = new Renderer(_window);
-    _c8 = new Chip8(_renderer);
+    _c8 = new Chip8();
+    _renderer = new Renderer(_window, _c8);
     _c8->load(path);
 }
 
