@@ -4,7 +4,6 @@
 
 #include "chip8.h"
 
-// Chip8::Chip8(Renderer *renderer) {
 Chip8::Chip8() {
     // allocating memory
     stack = new uint16_t [16];
@@ -16,7 +15,6 @@ Chip8::Chip8() {
 
     // Seeding the rng
     rng.seed(std::chrono::steady_clock().now().time_since_epoch().count()); // I love chrono Black Magic :)
-    // _renderer = renderer;
 
     // init framebuffer
     _clearFrameBuffer();
@@ -224,8 +222,6 @@ void Chip8::emulateCycle() {
             break;
         case 0xD000: // Dxyn: Display an n-byte sprite starting at memory
                      // location I at (Vx, Vy) on the screen, VF = collision
-            //  x, y, v[x], v[y], n);
-            // _renderer->setFrameMap(v[x], v[y], n); // todo: fix
             v[0xf] = 0;
             for (int row = 0; row < n; row++) {
                 uint8_t sprite = mem[i + row];

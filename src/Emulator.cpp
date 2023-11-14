@@ -4,11 +4,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_sdl.h>
-#include <imgui/imgui_impl_opengl3.h>
-#include <imgui/imgui_memory_editor.h>
-
 
 Emulator::Emulator(const std::string &path, bool debugMode) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);

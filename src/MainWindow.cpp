@@ -10,7 +10,7 @@ MainWindow::MainWindow(const std::string &path) : Window("Insert title later", 6
     }
 
     _c8 = new Chip8();
-    _renderer = new Renderer(_window, _c8);
+    _renderer = new Renderer(_c8);
     _c8->load(path);
 }
 
@@ -22,7 +22,6 @@ MainWindow::~MainWindow() {
 
 
 void MainWindow::render() {
-    // Normally I should make calls for Renderer
     makeCurrent();
     _renderer->render();
 }
