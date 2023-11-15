@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "MessageBox.h"
 
 #include <glad/glad.h>
 
@@ -104,6 +105,7 @@ Renderer::Renderer(Chip8 *chip8) : _chip8(chip8) {
     if (!success) {
         glGetShaderInfoLog(_shader, 512, nullptr, buildLog);
         std::cerr << "Shader link error:\n" << buildLog << "\n";
+        MessageBox::error("Error building shader", "Shader error");
     }
 
     glDetachShader(_shader, vertexShader);

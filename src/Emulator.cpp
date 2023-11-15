@@ -1,4 +1,5 @@
 #include "Emulator.h"
+#include "MessageBox.h"
 
 #include <glad/glad.h>
 #include <SDL2/SDL.h>
@@ -41,8 +42,10 @@ void Emulator::_loadConfig() {
     std::fstream configFile;
     configFile.open("config", std::ios::in);
     if(!configFile.is_open()) {
-        std::cerr << "Failed to load configuration file\n";
-        std::cerr << "Migraine will start with the default configuration\n";
+        MessageBox::warning(
+            "Migraine will start with the default configuration",
+            "Failed to load configuration file"
+        );
     }
 
     std::string line, key, value;

@@ -1,8 +1,10 @@
+#include "chip8.h"
+#include "MessageBox.h"
+
 #include <fstream>
+#include <sstream>
 
 #include <string.h>
-
-#include "chip8.h"
 
 Chip8::Chip8() {
     // allocating memory
@@ -62,7 +64,7 @@ bool Chip8::load(const std::string &path) {
     // Loading program
     std::ifstream romLoader(path, std::ios::in | std::ios::binary);
     if(!romLoader.is_open()) {
-        std::cerr << "Error : Failed to open the file " << path << "\n";
+        MessageBox::warning("Failed to open file at " + path);
         return false;
     }
 
@@ -101,7 +103,9 @@ bool Chip8::load(const std::string &path) {
 }
 
 static void invalidOpcode(uint16_t opcode) {
-    std::cerr << std::hex << "opcode " << opcode << " is undefined\n";
+    std::stringstream ss;
+    ss << std::hex << "opcode 0x" << opcode << " is undefined";
+    MessageBox::error(ss.str(), "Problem in the rom file");
     exit(1);
 }
 

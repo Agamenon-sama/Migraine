@@ -2,12 +2,14 @@
 
 #include <glad/glad.h>
 
+#include "MessageBox.h"
+
 MainWindow::MainWindow(const std::string &path, uint8_t pixelSize)
     : Window(path, 64 * pixelSize, 32 * pixelSize) {
 
     // Load OpenGL. NEVER FORGET TO LOAD OpenGL
     if (!gladLoadGLLoader(((GLADloadproc) SDL_GL_GetProcAddress))) {
-        std::cerr << "Failed to load OpenGL\n";
+        MessageBox::error("Failed to load OpenGL");
         exit(1);
     }
 

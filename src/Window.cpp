@@ -6,6 +6,8 @@
 #include <glad/glad.h>
 #include <SDL2/SDL_opengl.h>
 
+#include "MessageBox.h"
+
 Window::Window(std::string title, int width, int height, bool resizable) {
     uint32_t flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
     if (resizable) {
@@ -18,7 +20,7 @@ Window::Window(std::string title, int width, int height, bool resizable) {
         width, height, flags);
 
     if(!_window) {
-        std::cerr << "Failed to create window : " << SDL_GetError() << "\nExiting\n";
+        MessageBox::error(SDL_GetError(), "Failed to create window");
         exit(1);
     }
 
