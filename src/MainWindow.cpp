@@ -2,7 +2,9 @@
 
 #include <glad/glad.h>
 
-MainWindow::MainWindow(const std::string &path) : Window("Insert title later", 640, 320) {
+MainWindow::MainWindow(const std::string &path, uint8_t pixelSize)
+    : Window(path, 64 * pixelSize, 32 * pixelSize) {
+
     // Load OpenGL. NEVER FORGET TO LOAD OpenGL
     if (!gladLoadGLLoader(((GLADloadproc) SDL_GL_GetProcAddress))) {
         std::cerr << "Failed to load OpenGL\n";

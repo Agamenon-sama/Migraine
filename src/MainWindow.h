@@ -14,7 +14,7 @@ public:
      * 
      *  @param path path to the rom file to load
     */
-    MainWindow(const std::string &path);
+    MainWindow(const std::string &path, uint8_t pixelSize);
     ~MainWindow();
 
     /**

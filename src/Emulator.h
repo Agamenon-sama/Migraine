@@ -34,5 +34,23 @@ private:
      * @brief Flag which specifies whether we let the emulator run on its own
      * or only run an instruction on user demand
     */
-    bool _debugMode; 
+    bool _debugMode;
+
+    uint8_t _pixelSize; ///< @brief Width and height of the pixel on screen
+    /**
+     * @brief Number of fetch-decode-execute operations to do per frame
+     * 
+     * By default, VSync is on, meaning the renderer should draw at a frame rate
+     * equal to your monitor's refresh rate. In every frame, the emulator will execute
+     * a number of instructions from the rom file equal to the value set in this variable
+    */
+    uint16_t _cyclesPerFrame;
+
+    /**
+     * @brief Reads the configuration file and sets the emulator accordingly
+     * 
+     * The configuration file must be called "config" and be placed in the same
+     * folder as the executable
+    */
+    void _loadConfig();
 };
