@@ -27,7 +27,6 @@ public:
     */
     Chip8 *_c8;
 
-private:
     /**
      * @brief Owning pointer to the renderer of the emulator window
     */

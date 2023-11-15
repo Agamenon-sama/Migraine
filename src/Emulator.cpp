@@ -18,11 +18,17 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
     _pixelSize = 10;
     _cyclesPerFrame = 10;
     _debugMode = debugMode;
+    _onColor[0] = 255;  _offColor[0] = 0;
+    _onColor[1] = 255;  _offColor[1] = 0;
+    _onColor[2] = 255;  _offColor[2] = 0;
 
     _loadConfig();
 
     _main  = new MainWindow(path, _pixelSize);
     _debug = new Debugger(_main->_c8);
+
+    _main->_renderer->setOnColor(_onColor[0], _onColor[1], _onColor[2]);
+    _main->_renderer->setOffColor(_offColor[0], _offColor[1], _offColor[2]);
 }
 
 Emulator::~Emulator() {
@@ -73,6 +79,68 @@ void Emulator::_loadConfig() {
         else if (key == "cycles_per_frame") {
             try {
                 _cyclesPerFrame = std::stoi(value);
+            }
+            catch (std::exception &e) {
+                slog::warning("invalid value at line " + std::to_string(lineNum));
+                slog::message(e.what());
+            }
+        }
+        else if (key == "lit_pixel") {
+            try {
+                if (value.size() == 6) {
+                    uint8_t r, g, b;
+                    r = std::stoi(value.substr(0, 2), 0, 16);
+                    g = std::stoi(value.substr(2, 2), 0, 16);
+                    b = std::stoi(value.substr(4, 2), 0, 16);
+
+                    _onColor[0] = r; _onColor[1] = g; _onColor[2] = b;
+                }
+                else if (value.size() == 3) {
+                    uint8_t r, g, b;
+                    r = std::stoi(value.substr(0, 1) + value.substr(0, 1), 0, 16);
+                    g = std::stoi(value.substr(1, 1) + value.substr(1, 1), 0, 16);
+                    b = std::stoi(value.substr(2, 1) + value.substr(2, 1), 0, 16);
+
+                    _onColor[0] = r; _onColor[1] = g; _onColor[2] = b;
+                }
+                else {
+                    slog::warning("invalid value at line " + std::to_string(lineNum));
+                    slog::message(
+                        "color values must be in the format `rrggbb` of `rgb` "
+                        "where r, g and b are hexadecimal values"
+                    );
+                }
+            }
+            catch (std::exception &e) {
+                slog::warning("invalid value at line " + std::to_string(lineNum));
+                slog::message(e.what());
+            }
+        }
+        else if (key == "unlit_pixel") {
+            try {
+                if (value.size() == 6) {
+                    uint8_t r, g, b;
+                    r = std::stoi(value.substr(0, 2), 0, 16);
+                    g = std::stoi(value.substr(2, 2), 0, 16);
+                    b = std::stoi(value.substr(4, 2), 0, 16);
+
+                    _offColor[0] = r; _offColor[1] = g; _offColor[2] = b;
+                }
+                else if (value.size() == 3) {
+                    uint8_t r, g, b;
+                    r = std::stoi(value.substr(0, 1) + value.substr(0, 1), 0, 16);
+                    g = std::stoi(value.substr(1, 1) + value.substr(1, 1), 0, 16);
+                    b = std::stoi(value.substr(2, 1) + value.substr(2, 1), 0, 16);
+
+                    _offColor[0] = r; _offColor[1] = g; _offColor[2] = b;
+                }
+                else {
+                    slog::warning("invalid value at line " + std::to_string(lineNum));
+                    slog::message(
+                        "color values must be in the format `rrggbb` of `rgb` "
+                        "where r, g and b are hexadecimal values"
+                    );
+                }
             }
             catch (std::exception &e) {
                 slog::warning("invalid value at line " + std::to_string(lineNum));

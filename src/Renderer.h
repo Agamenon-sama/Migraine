@@ -24,12 +24,24 @@ public:
     */
     void render();
 
+    /**
+     * @brief Sets the RGB color of lit pixels
+    */
+    void setOnColor(uint8_t r, uint8_t g, uint8_t b);
+    /**
+     * @brief Sets the RGB color of unlit pixels
+    */
+    void setOffColor(uint8_t r, uint8_t g, uint8_t b);
+
 private:
     uint8_t *_image; ///< @brief CPU side frame buffer
-    uint32_t _vao;
-    uint32_t _vbo;
+    uint32_t _vao; ///< @brief OpenGL vertex array
+    uint32_t _vbo; ///< @brief OpenGL vertex buffer
     uint32_t _texture; ///< @brief GPU side frame buffer
-    uint32_t _shader;
+    uint32_t _shader; ///< @brief OpenGL shader
+    
+    uint8_t _onColor[3];  ///< @brief RGB color of lit pixels
+    uint8_t _offColor[3]; ///< @brief RGB color of unlit pixels
 
     Chip8 *_chip8; ///< @brief Non-owning pointer to chip8 machine
 };

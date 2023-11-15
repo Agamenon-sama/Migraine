@@ -46,6 +46,9 @@ private:
     */
     uint16_t _cyclesPerFrame;
 
+    uint8_t _onColor[3];  ///< @brief RGB color of lit pixels
+    uint8_t _offColor[3]; ///< @brief RGB color of unlit pixels
+
     /**
      * @brief Reads the configuration file and sets the emulator accordingly
      * 

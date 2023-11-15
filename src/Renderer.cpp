@@ -6,6 +6,11 @@
 #include <string.h>
 
 Renderer::Renderer(Chip8 *chip8) : _chip8(chip8) {
+    // setting the color
+    _onColor[0] = 255;  _offColor[0] = 0;
+    _onColor[1] = 255;  _offColor[1] = 0;
+    _onColor[2] = 255;  _offColor[2] = 0;
+    
     // opengl buffers
     float vertices[6*4] = {
         // position   // texture coord
@@ -114,6 +119,17 @@ Renderer::~Renderer() {
     glDeleteBuffers(1, &_vbo);
 }
 
+void Renderer::setOnColor(uint8_t r, uint8_t g, uint8_t b) {
+    _onColor[0] = r;
+    _onColor[1] = g;
+    _onColor[2] = b;
+}
+void Renderer::setOffColor(uint8_t r, uint8_t g, uint8_t b) {
+    _offColor[0] = r;
+    _offColor[1] = g;
+    _offColor[2] = b;
+}
+
 void Renderer::clear() {
     glClearColor(0.11, 0.11, 0.11, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -126,10 +142,10 @@ void Renderer::render() {
     // rendering the image
     for (int y = 0; y < 32; y++) {
         for (int x = 0; x < 64; x++) {
-            uint8_t pixel = _chip8->_frameBuffer[y][x] ? 255 : 0;
-            _image[((31 - y)*64 + x) * 3] = pixel;
-            _image[((31 - y)*64 + x) * 3 + 1] = pixel;
-            _image[((31 - y)*64 + x) * 3 + 2] = pixel;
+            // uint8_t pixel = _chip8->_frameBuffer[y][x] ? 255 : 0;
+            _image[((31 - y)*64 + x) * 3]     = _chip8->_frameBuffer[y][x] ? _onColor[0] : _offColor[0];
+            _image[((31 - y)*64 + x) * 3 + 1] = _chip8->_frameBuffer[y][x] ? _onColor[1] : _offColor[1];
+            _image[((31 - y)*64 + x) * 3 + 2] = _chip8->_frameBuffer[y][x] ? _onColor[2] : _offColor[2];
         }
     }
 
