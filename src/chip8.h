@@ -59,10 +59,6 @@ public:
 private:
     /**
      * @brief Sets all pixel values to off
-     * 
-     * 
-     * 
-     
     */
     void _clearFrameBuffer();
 };

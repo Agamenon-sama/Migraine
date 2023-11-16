@@ -4,32 +4,30 @@
 
 #include "MessageBox.h"
 
-enum class Chip8Key : int {
-    K0 = SDL_SCANCODE_X,
-    K1 = SDL_SCANCODE_1,
-    K2 = SDL_SCANCODE_2,
-    K3 = SDL_SCANCODE_3,
-    K4 = SDL_SCANCODE_Q,
-    K5 = SDL_SCANCODE_W,
-    K6 = SDL_SCANCODE_E,
-    K7 = SDL_SCANCODE_A,
-    K8 = SDL_SCANCODE_S,
-    K9 = SDL_SCANCODE_D,
-    KA = SDL_SCANCODE_Z,
-    KB = SDL_SCANCODE_C,
-    KC = SDL_SCANCODE_4,
-    KD = SDL_SCANCODE_R,
-    KE = SDL_SCANCODE_F,
-    KF = SDL_SCANCODE_V
-};
-
+/**
+ * @brief Provides Keyboard related operations for the chip8 emulator
+*/
 class Keyboard {
 public:
+    /**
+     * @brief Tells if the button indicated by `key` is pressed
+     * 
+     * @param key a value from 0x0 to 0xf indicating the chip8 keyboard key
+     * 
+     * @returns true if the indicated key is pressed, false otherwise
+    */
     static bool keyPressed(int key) {
         auto keys = SDL_GetKeyboardState(nullptr);
-        return keys[toScanCode(key)];
+        return keys[_toScanCode(key)];
     }
 
+    /**
+     * @brief Tells if any button is pressed on the keyboard
+     * 
+     * @param vx pointer to where to write the pressed key which is a value between 0x0 and 0xf
+     * 
+     * @returns true if any button is pressed, false otherwise
+    */
     static bool anyKeyPressed(uint8_t *vx) {
         // this line should be useless but just to calm the voices in my head
         if (!vx) { return false; }
@@ -37,7 +35,7 @@ public:
         auto keys = SDL_GetKeyboardState(nullptr);
 
         for (int i = 0; i <= 0xf; i++) {
-            if (keys[toScanCode(i)]) {
+            if (keys[_toScanCode(i)]) {
                 *vx = i;
                 return true;
             }
@@ -47,7 +45,14 @@ public:
     }
 
 private:
-    static SDL_Scancode toScanCode(int key) {
+    /**
+     * @brief Converts the key value to an SDL_Scancode
+     * 
+     * @param key a value from 0x0 to 0xf indicating the chip8 keyboard key
+     * 
+     * @returns an SDL_Scancode value for the equivalent physical keyboard buttons
+    */
+    static SDL_Scancode _toScanCode(int key) {
         SDL_Scancode scanCodes[] = {
             SDL_SCANCODE_X, SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,
             SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_A,

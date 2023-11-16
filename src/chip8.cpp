@@ -100,9 +100,17 @@ bool Chip8::load(const std::string &path) {
     for(uint8_t pixelIndex = 0; pixelIndex < 80; pixelIndex++) {
         mem[pixelIndex] = fontset[pixelIndex];
     }
+
+    memcpy(mem + 0x100, "Emulator made by Agamenon", 26);
+
     return true;
 }
 
+/**
+ * @brief Handles invalid opecodes
+ * 
+ * @param opecode invalid opcode
+*/
 static void invalidOpcode(uint16_t opcode) {
     std::stringstream ss;
     ss << std::hex << "opcode 0x" << opcode << " is undefined";
@@ -251,11 +259,9 @@ void Chip8::emulateCycle() {
         case 0xE000: // key-pressed events
             switch (nn) {
                 case 0x9E: // skip next instr if key[Vx] is pressed
-                    // todo: implement when I implement input handling
                     pc += Keyboard::keyPressed(v[x]) ? 4 : 2;
                     break;
                 case 0xA1: // skip next instr if key[Vx] is not pressed
-                    // todo: implement when I implement input handling
                     pc += !Keyboard::keyPressed(v[x]) ? 4 : 2;
                     break;
                 default:
@@ -269,12 +275,10 @@ void Chip8::emulateCycle() {
                     pc += 2;
                     break;
                 case 0x0A:
-                    // todo:
                     // if any key is pressed, we move to the next instruction
                     // else, we keep executing the same instruction
                     // thus implementing some sort of block without halting the process
                     pc += Keyboard::anyKeyPressed(&v[x]) ? 2 : 0;
-                    // pc += 2;
                     break;
                 case 0x15:
                     delayTimer = v[x];
