@@ -1,5 +1,6 @@
 #include "chip8.h"
 #include "MessageBox.h"
+#include "Keyboard.h"
 
 #include <fstream>
 #include <sstream>
@@ -106,7 +107,7 @@ static void invalidOpcode(uint16_t opcode) {
     std::stringstream ss;
     ss << std::hex << "opcode 0x" << opcode << " is undefined";
     MessageBox::error(ss.str(), "Problem in the rom file");
-    exit(1);
+    exit(3);
 }
 
 void Chip8::emulateCycle() {
@@ -251,9 +252,11 @@ void Chip8::emulateCycle() {
             switch (nn) {
                 case 0x9E: // skip next instr if key[Vx] is pressed
                     // todo: implement when I implement input handling
+                    pc += Keyboard::keyPressed(v[x]) ? 4 : 2;
                     break;
                 case 0xA1: // skip next instr if key[Vx] is not pressed
                     // todo: implement when I implement input handling
+                    pc += !Keyboard::keyPressed(v[x]) ? 4 : 2;
                     break;
                 default:
                     invalidOpcode(opcode);
@@ -267,7 +270,11 @@ void Chip8::emulateCycle() {
                     break;
                 case 0x0A:
                     // todo:
-                    pc += 2;
+                    // if any key is pressed, we move to the next instruction
+                    // else, we keep executing the same instruction
+                    // thus implementing some sort of block without halting the process
+                    pc += Keyboard::anyKeyPressed(&v[x]) ? 2 : 0;
+                    // pc += 2;
                     break;
                 case 0x15:
                     delayTimer = v[x];

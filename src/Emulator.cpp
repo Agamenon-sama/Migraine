@@ -187,6 +187,10 @@ void Emulator::run() {
                 _main->_c8->emulateCycle();
             }
         }
+        
+        // Decrement timers
+        if (_main->_c8->delayTimer > 0) _main->_c8->delayTimer--;
+        if (_main->_c8->soundTimer > 0) _main->_c8->soundTimer--;
 
         // Rendering
         _debug->render();
