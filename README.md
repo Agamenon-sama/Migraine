@@ -32,3 +32,7 @@ cd build
 cmake ..
 make
 ```
+
+## License
+
+GNU General Public License v3.0
