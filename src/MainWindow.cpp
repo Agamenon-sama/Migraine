@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include "MessageBox.h"
+#include "system/MessageBox.h"
 
 MainWindow::MainWindow(const std::string &path, uint8_t pixelSize)
     : Window(path, 64 * pixelSize, 32 * pixelSize) {

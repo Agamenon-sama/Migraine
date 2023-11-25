@@ -1,6 +1,6 @@
 #include "chip8.h"
-#include "MessageBox.h"
-#include "Keyboard.h"
+#include "system/MessageBox.h"
+#include "system/Keyboard.h"
 
 #include <fstream>
 #include <sstream>

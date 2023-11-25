@@ -2,7 +2,7 @@
 
 #include "chip8.h"
 #include "Renderer.h"
-#include "Window.h"
+// #include "Window.h"
 #include "Debugger.h"
 #include "MainWindow.h"
 

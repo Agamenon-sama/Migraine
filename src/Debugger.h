@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Window.h"
+#include "system/Window.h"
 #include "GuiFrame.h"
 #include "chip8.h"
 #include "Assembler/Disassembler.h"

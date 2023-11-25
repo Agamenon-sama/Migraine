@@ -6,7 +6,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "Window.h"
+#include "system/Window.h"
 
 class GuiFrame {
     public:
