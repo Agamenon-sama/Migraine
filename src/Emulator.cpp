@@ -7,6 +7,7 @@
 #include <slog/slog.h>
 
 #include <fstream>
+#include <algorithm>
 
 
 Emulator::Emulator(const std::string &path, bool debugMode) {
@@ -23,12 +24,12 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
     _onColor[1] = 255;  _offColor[1] = 0;
     _onColor[2] = 255;  _offColor[2] = 0;
 
-    _loadConfig();
+    _beeper = new Beeper();
 
     _main  = new MainWindow(path, _pixelSize);
-    _debug = new Debugger(_main->_c8);
+    _debug = new Debugger(_main->_c8, _beeper);
 
-    _beeper = new Beeper();
+    _loadConfig();
 
     _main->_renderer->setOnColor(_onColor[0], _onColor[1], _onColor[2]);
     _main->_renderer->setOffColor(_offColor[0], _offColor[1], _offColor[2]);
@@ -86,6 +87,38 @@ void Emulator::_loadConfig() {
         else if (key == "cycles_per_frame") {
             try {
                 _cyclesPerFrame = std::stoi(value);
+            }
+            catch (std::exception &e) {
+                slog::warning("invalid value at line " + std::to_string(lineNum));
+                slog::message(e.what());
+            }
+        }
+        else if (key == "sound_frequency") {
+            try {
+                float frequency = std::clamp(std::stof(value), 20.f, 20'000.f);
+                _beeper->setFrequency(frequency);
+            }
+            catch (std::exception &e) {
+                slog::warning("invalid value at line " + std::to_string(lineNum));
+                slog::message(e.what());
+            }
+        }
+        else if (key == "sound_volume") {
+            try {
+                float volume = std::clamp(std::stof(value), 0.f, 1.f);
+                _beeper->setVolume(volume);
+            }
+            catch (std::exception &e) {
+                slog::warning("invalid value at line " + std::to_string(lineNum));
+                slog::message(e.what());
+            }
+        }
+        else if (key == "sound_signal") {
+            try {
+                // if signal is sin, then set it to sin wave otherwise it's a square wave
+                SignalType type = (value == "sin" ? SignalType::Sin : SignalType::Square);
+                
+                _beeper->setSignaltype(type);
             }
             catch (std::exception &e) {
                 slog::warning("invalid value at line " + std::to_string(lineNum));

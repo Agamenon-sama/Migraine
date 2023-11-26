@@ -4,10 +4,11 @@
 
 #include <fstream>
 
-Debugger::Debugger(Chip8 *chip) : Window("Debugger", 1280, 720, true) {
+Debugger::Debugger(Chip8 *chip, Beeper *beeper) : Window("Debugger", 1280, 720, true) {
     _gui.create(this);
 
     _chip = chip;
+    _beeper = beeper;
 }
 
 Debugger::~Debugger() {
@@ -112,6 +113,23 @@ void Debugger::render() {
     }
 
     ImGui::TextWrapped("%s", _assemblyCode.c_str());
+
+    ImGui::End();
+
+    ImGui::Begin("Sound");
+    
+    float frequency = _beeper->getFrequency(), volume = _beeper->getVolume();
+    int signalType = (int)_beeper->getSignalType();
+
+    if (ImGui::InputFloat("Frequency", &frequency, 0.1f, 50.f, "%.2f")) {
+        _beeper->setFrequency(frequency);
+    }
+    if (ImGui::SliderFloat("Volume", &volume, 0.f, 1.f)) {
+        _beeper->setVolume(volume);
+    }
+    if (ImGui::Combo("Signal type", &signalType, "Square\0Sin\0\0")) {
+        _beeper->setSignaltype((SignalType)signalType);
+    }
 
     ImGui::End();
 

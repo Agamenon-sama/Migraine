@@ -4,12 +4,13 @@
 #include "GuiFrame.h"
 #include "chip8.h"
 #include "Assembler/Disassembler.h"
+#include "system/Beeper.h"
 
 #include <imgui/imgui_memory_editor.h>
 
 class Debugger : public Window {
-    public:
-    Debugger(Chip8 *chip);
+public:
+    Debugger(Chip8 *chip, Beeper *beeper);
     ~Debugger();
 
     void render();
@@ -19,6 +20,7 @@ class Debugger : public Window {
     Disassembler _disassembler;
     std::string _assemblyCode;
     
-    private:
+private:
     Chip8 *_chip;
+    Beeper *_beeper;
 };

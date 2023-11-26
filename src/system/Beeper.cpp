@@ -29,7 +29,13 @@ void audioCallback(void *userdata, uint8_t *s, int len) {
 
     for (int i = 0; i < len; i++, audio->sampleNum++) {
         double time = (double)audio->sampleNum / 48'000.f;
-        stream[i] = (uint16_t) (amplitude * (std::sin(PI2 * audio->freq * time) > 0 ? 1 : -1));
+        
+        if (audio->type == SignalType::Square) {
+            stream[i] = (uint16_t) (amplitude * (std::sin(PI2 * audio->freq * time) > 0 ? 1 : -1));
+        }
+        else if (audio->type == SignalType::Sin) {
+            stream[i] = (uint16_t) (amplitude * std::sin(PI2 * audio->freq * time));
+        }
     }
 }
 
@@ -37,7 +43,8 @@ Beeper::Beeper(float freq, float volume) {
     _audioConfig = {
         .freq = freq,
         .volume = volume,
-        .sampleNum = 0
+        .sampleNum = 0,
+        .type = SignalType::Square
     };
 
     SDL_AudioSpec desired;
@@ -78,3 +85,16 @@ void Beeper::unbeep() {
         SDL_PauseAudioDevice(_device, 1); // turn audio off
     }
 }
+
+void Beeper::setFrequency(float freq) {
+    _audioConfig.freq = freq;
+}
+
+void Beeper::setVolume(float volume) {
+    _audioConfig.volume = volume;
+}
+
+void Beeper::setSignaltype(SignalType type) {
+    _audioConfig.type = type;
+}
+

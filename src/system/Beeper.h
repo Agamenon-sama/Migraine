@@ -3,6 +3,14 @@
 #include <SDL2/SDL_audio.h>
 
 /**
+ * @brief Specify the formula used to create the wave form of the sound
+*/
+enum class SignalType : int {
+    Square = 0,
+    Sin = 1
+};
+
+/**
  * @brief Contains the data sent to the callback for sound generation
 */
 struct AudioData {
@@ -14,6 +22,7 @@ struct AudioData {
      * @note Not meant to be set by user and should be treated as private
     */
     int sampleNum;
+    SignalType type; ///< @brief Type of the signal
 };
 
 /**
@@ -43,6 +52,29 @@ public:
      * if we passed the timeout. If the timeout isn't over, the sound will continue
     */
     void unbeep();
+
+    /**
+     * @brief Sets a new frequency
+     * 
+     * @param freq the new frequency
+    */
+    void setFrequency(float freq);
+    /**
+     * @brief Sets a new volume
+     * 
+     * @param volume the new volume
+    */
+    void setVolume(float volume);
+    /**
+     * @brief Sets a new signal type
+     * 
+     * @param type the new signal type
+    */
+    void setSignaltype(SignalType type);
+
+    float getFrequency() const { return _audioConfig.freq; } ///< @brief Gets the current frequency
+    float getVolume() const { return _audioConfig.volume; } ///< @brief Gets the current volume
+    SignalType getSignalType() const { return _audioConfig.type; } ///< @brief Gets the current signal type
 
 private:
     SDL_AudioDeviceID _device; ///< @brief Sound device id
