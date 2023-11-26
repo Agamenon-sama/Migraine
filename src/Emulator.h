@@ -2,10 +2,13 @@
 
 #include "chip8.h"
 #include "Renderer.h"
-// #include "Window.h"
 #include "Debugger.h"
 #include "MainWindow.h"
+#include "system/Beeper.h"
 
+/**
+ * @brief Handles the whole emulator
+*/
 class Emulator {
 public:
     /**
@@ -29,6 +32,8 @@ public:
 private:
     MainWindow *_main; ///< @brief Pointer to the emulator screen window and emulator
     Debugger *_debug; ///< @brief Pointer to the debugger window
+
+    Beeper *_beeper; ///< @brief Pointer to system that handles sound
 
     /**
      * @brief Flag which specifies whether we let the emulator run on its own

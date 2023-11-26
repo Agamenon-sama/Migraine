@@ -10,7 +10,7 @@
 
 
 Emulator::Emulator(const std::string &path, bool debugMode) {
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -28,13 +28,17 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
     _main  = new MainWindow(path, _pixelSize);
     _debug = new Debugger(_main->_c8);
 
+    _beeper = new Beeper();
+
     _main->_renderer->setOnColor(_onColor[0], _onColor[1], _onColor[2]);
     _main->_renderer->setOffColor(_offColor[0], _offColor[1], _offColor[2]);
+
 }
 
 Emulator::~Emulator() {
     delete _debug;
     delete _main;
+    delete _beeper;
     SDL_Quit();
 }
 
@@ -187,10 +191,16 @@ void Emulator::run() {
                 _main->_c8->emulateCycle();
             }
         }
-        
+
+        // turn off audio after some time
+        _beeper->unbeep();
+
         // Decrement timers
         if (_main->_c8->delayTimer > 0) _main->_c8->delayTimer--;
-        if (_main->_c8->soundTimer > 0) _main->_c8->soundTimer--;
+        if (_main->_c8->soundTimer > 0) {
+            _beeper->beep();
+            _main->_c8->soundTimer--;
+        }
 
         // Rendering
         _debug->render();
