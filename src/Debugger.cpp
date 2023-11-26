@@ -127,7 +127,7 @@ void Debugger::render() {
     if (ImGui::SliderFloat("Volume", &volume, 0.f, 1.f)) {
         _beeper->setVolume(volume);
     }
-    if (ImGui::Combo("Signal type", &signalType, "Square\0Sin\0\0")) {
+    if (ImGui::Combo("Signal type", &signalType, "Square\0Sin\0Triangle\0\0")) {
         _beeper->setSignaltype((SignalType)signalType);
     }
 

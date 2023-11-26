@@ -7,7 +7,8 @@
 */
 enum class SignalType : int {
     Square = 0,
-    Sin = 1
+    Sin = 1,
+    Triangle = 2
 };
 
 /**

@@ -115,8 +115,12 @@ void Emulator::_loadConfig() {
         }
         else if (key == "sound_signal") {
             try {
-                // if signal is sin, then set it to sin wave otherwise it's a square wave
-                SignalType type = (value == "sin" ? SignalType::Sin : SignalType::Square);
+                // sin = sin wave
+                // triangle = triangle wave
+                // anything else = square wave
+                SignalType type = (value == "sin" ? SignalType::Sin
+                                 : value == "triangle" ? SignalType::Triangle
+                                 : SignalType::Square);
                 
                 _beeper->setSignaltype(type);
             }

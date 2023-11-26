@@ -36,6 +36,13 @@ void audioCallback(void *userdata, uint8_t *s, int len) {
         else if (audio->type == SignalType::Sin) {
             stream[i] = (uint16_t) (amplitude * std::sin(PI2 * audio->freq * time));
         }
+        else if (audio->type == SignalType::Triangle) {
+            // I'm so proud of this formula. I got it by a lot of tinkering
+            // rather than actual understanding ╮(︶▽︶)╭ 
+            // It feels a bit nice when things just decide to go well for you
+            stream[i] = (uint16_t) (amplitude *
+                    (std::acos(std::sin(PI2 * audio->freq * time + M_PI)) / M_PI_2 - 1.f));
+        }
     }
 }
 
