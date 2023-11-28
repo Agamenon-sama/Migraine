@@ -26,10 +26,10 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
 
     _beeper = new Beeper();
 
+    _loadConfig();
+
     _main  = new MainWindow(path, _pixelSize);
     _debug = new Debugger(_main->_c8, _beeper);
-
-    _loadConfig();
 
     _main->_renderer->setOnColor(_onColor[0], _onColor[1], _onColor[2]);
     _main->_renderer->setOffColor(_offColor[0], _offColor[1], _offColor[2]);
