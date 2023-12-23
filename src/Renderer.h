@@ -33,6 +33,11 @@ public:
     */
     void setOffColor(uint8_t r, uint8_t g, uint8_t b);
 
+    /**
+     * @brief Toggles on and off the crt effect
+    */
+    void crtEffect();
+
 private:
     uint8_t *_image; ///< @brief CPU side frame buffer
     uint32_t _vao; ///< @brief OpenGL vertex array
@@ -40,6 +45,7 @@ private:
     uint32_t _texture; ///< @brief GPU side frame buffer
     uint32_t _shader; ///< @brief OpenGL shader
     
+    bool _crtEffect; ///< @brief stores whether we use the crt effect or not
     uint8_t _onColor[3];  ///< @brief RGB color of lit pixels
     uint8_t _offColor[3]; ///< @brief RGB color of unlit pixels
 

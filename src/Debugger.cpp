@@ -1,6 +1,7 @@
 #include "Debugger.h"
 
 #include <glad/glad.h>
+#include <SDL2/SDL_events.h>
 
 #include <fstream>
 
@@ -116,7 +117,16 @@ void Debugger::render() {
 
     ImGui::End();
 
-    ImGui::Begin("Sound");
+    ImGui::Begin("Graphics & Sound");
+
+    if (ImGui::Button("CRT effect")) {
+        SDL_Event ev;
+        ev.type = SDL_USEREVENT;
+        ev.user.code = 0;
+        SDL_PushEvent(&ev);
+    }
+
+    ImGui::Separator();
     
     float frequency = _beeper->getFrequency(), volume = _beeper->getVolume();
     int signalType = (int)_beeper->getSignalType();

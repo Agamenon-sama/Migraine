@@ -210,6 +210,11 @@ void Emulator::run() {
                 break;
             }
 
+            if (event.type == SDL_USEREVENT && event.user.code == 0) {
+                // when we get this event, we toggle on or off the crt effect
+                _main->_renderer->crtEffect();
+            }
+
             // handle window events
             _main->handleEvents(event);
             _debug->handleEvents(event);

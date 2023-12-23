@@ -8,8 +8,9 @@ It's called Migraine because trust me, this project is a real headache
 
 ## Status
 
-- The emulator is mostly functional but still lacks some important
-- The renderer for the emulator screen is good but could benefit from more tweaks
+- The emulator is good
+- The renderer is great
+- The sound is good
 - The debugger is half ok
 - The assembler is half ok
 - The disassembler is still in very early stages
