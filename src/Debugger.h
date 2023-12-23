@@ -14,7 +14,7 @@ public:
     ~Debugger();
 
     void render();
-
+    void handleEvents(SDL_Event &ev) override;
     GuiFrame _gui;
     MemoryEditor _memEditor;
     Disassembler _disassembler;

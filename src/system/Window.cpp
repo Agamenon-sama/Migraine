@@ -1,8 +1,5 @@
 #include "Window.h"
 
-#include <iostream>
-#include <sstream>
-
 #include <glad/glad.h>
 #include <SDL2/SDL_opengl.h>
 
@@ -90,20 +87,6 @@ void Window::handleEvents(SDL_Event &ev) {
             default:
                 break;
         }
-        if(updateCaption) { // This is temporary
-            std::stringstream caption;
-            caption << _title << " - Mouse " << (_mouseFocus ? "ON" : "OFF") << " KeyBoard " << (_keyboardFocus ? "ON" : "OFF");
-            SDL_SetWindowTitle(_window, caption.str().c_str());
-        }
-    } else if(ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_F11) {
-        if(_fullscreen) {
-            SDL_SetWindowFullscreen(_window, 0);
-            _fullscreen = false;
-        } else {
-            SDL_SetWindowFullscreen(_window, _fullscreenMode);
-            _fullscreen = true;
-            _minimized = false;
-        }
     }
 }
 
@@ -121,6 +104,16 @@ void Window::makeCurrent() {
 void Window::swapBuffers() {
     makeCurrent();
     SDL_GL_SwapWindow(_window);
+}
+
+void Window::show() {
+    _shown = true;
+    SDL_ShowWindow(_window);
+}
+
+void Window::hide() {
+    _shown = false;
+    SDL_HideWindow(_window);
 }
 
 void Window::focus() {

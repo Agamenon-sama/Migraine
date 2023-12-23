@@ -8,12 +8,14 @@ public:
     Window(std::string title, int width, int height, bool resizable = false);
     virtual ~Window();
 
-    void handleEvents(SDL_Event &ev);
+    virtual void handleEvents(SDL_Event &ev);
     void free();
     void focus();
     void createGLContext();
     virtual void swapBuffers();
     void makeCurrent();
+    void show();
+    void hide();
 
 
     SDL_Window *getSDLWindow() const;

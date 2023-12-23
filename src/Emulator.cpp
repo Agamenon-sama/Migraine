@@ -30,6 +30,8 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
 
     _main  = new MainWindow(path, _pixelSize);
     _debug = new Debugger(_main->_c8, _beeper);
+    
+    if (!_debugMode) _debug->hide();
 
     _main->_renderer->setOnColor(_onColor[0], _onColor[1], _onColor[2]);
     _main->_renderer->setOffColor(_offColor[0], _offColor[1], _offColor[2]);
@@ -214,6 +216,13 @@ void Emulator::run() {
                 // when we get this event, we toggle on or off the crt effect
                 _main->_renderer->crtEffect();
             }
+            else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                case SDLK_F12:
+                    _debug->show();
+                    break;
+                }
+            }
 
             // handle window events
             _main->handleEvents(event);
@@ -221,7 +230,7 @@ void Emulator::run() {
             _debug->_gui.handleEvents(event);
 
             // close the app if all windows are closed
-            if(!_main->isShown() && !_debug->isShown()) {
+            if(!_main->isShown()) {
                 SDL_Event tempEvent;
                 tempEvent.type = SDL_QUIT;
                 SDL_PushEvent(&tempEvent);

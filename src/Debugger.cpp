@@ -16,6 +16,21 @@ Debugger::~Debugger() {
     _gui.shutdown();
 }
 
+void Debugger::handleEvents(SDL_Event &ev) {
+    Window::handleEvents(ev);
+
+    if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_F11) {
+        if(_fullscreen) {
+            SDL_SetWindowFullscreen(_window, 0);
+            _fullscreen = false;
+        } else {
+            SDL_SetWindowFullscreen(_window, _fullscreenMode);
+            _fullscreen = true;
+            _minimized = false;
+        }
+    }
+}
+
 static bool inputInt(const char* label, int* v) {
     int step = 1, step_fast = 100;
     ImGuiInputTextFlags flags = 0;
