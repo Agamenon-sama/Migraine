@@ -19,7 +19,7 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
 
     _pixelSize = 10;
     _cyclesPerFrame = 10;
-    _debugMode = debugMode;
+    _pause = debugMode;
     _onColor[0] = 255;  _offColor[0] = 0;
     _onColor[1] = 255;  _offColor[1] = 0;
     _onColor[2] = 255;  _offColor[2] = 0;
@@ -31,13 +31,13 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
     _main  = new MainWindow(_pixelSize);
     _debug = new Debugger(_main->_c8, _beeper);
     
-    if (!_debugMode) _debug->hide();
+    if (!debugMode) _debug->hide();
 
     _main->_renderer->setOnColor(_onColor[0], _onColor[1], _onColor[2]);
     _main->_renderer->setOffColor(_offColor[0], _offColor[1], _offColor[2]);
 
     if (path == "") {
-        _debugMode = true;
+        _pause = true;
     }
     else {
         _main->loadRom(path);
@@ -218,9 +218,23 @@ void Emulator::run() {
                 break;
             }
 
-            if (event.type == SDL_USEREVENT && event.user.code == 0) {
-                // when we get this event, we toggle on or off the crt effect
-                _main->_renderer->crtEffect();
+            if (event.type == SDL_USEREVENT) {
+                switch (event.user.code) {
+                /**
+                 * 0 -> toggle crt effect
+                 * 1 -> pause execution
+                 * 2 -> resume execution
+                */
+                case 0:
+                    _main->_renderer->crtEffect();
+                    break;
+                case 1:
+                    _pause = true;
+                    break;
+                case 2:
+                    _pause = false;
+                    break;
+                }
             }
             else if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
@@ -233,7 +247,7 @@ void Emulator::run() {
                 char *fileName = event.drop.file;
                 _main->loadRom(fileName);
                 SDL_free(fileName);
-                _debugMode = false;
+                _pause = false;
             }
 
             // handle window events
@@ -249,7 +263,7 @@ void Emulator::run() {
             }
         }
 
-        if (!_debugMode) {
+        if (!_pause) {
             for (int i = 0; i < _cyclesPerFrame; i++) {
                 _main->_c8->emulateCycle();
             }

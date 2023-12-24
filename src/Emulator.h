@@ -39,7 +39,7 @@ private:
      * @brief Flag which specifies whether we let the emulator run on its own
      * or only run an instruction on user demand
     */
-    bool _debugMode;
+    bool _pause;
 
     uint8_t _pixelSize; ///< @brief Width and height of the pixel on screen
     /**

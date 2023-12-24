@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <chrono>
 
 #include <string.h>
 
@@ -21,6 +22,10 @@ Chip8::Chip8() {
 
     // init framebuffer
     _clearFrameBuffer();
+
+    // set breakpoint
+    breakPointAddress = -1;
+    pause = false;
 }
 
 Chip8::~Chip8() {
@@ -109,7 +114,7 @@ bool Chip8::load(const std::string &path) {
 /**
  * @brief Handles invalid opecodes
  * 
- * @param opecode invalid opcode
+ * @param opcode invalid opcode
 */
 static void invalidOpcode(uint16_t opcode) {
     std::stringstream ss;
@@ -119,6 +124,9 @@ static void invalidOpcode(uint16_t opcode) {
 }
 
 void Chip8::emulateCycle() {
+    // If at pause state, don't do anything until it's changed from outside
+    if (pause) return;
+
     uint8_t x, y, n;
     uint8_t nn;
     uint16_t nnn;
@@ -136,8 +144,6 @@ void Chip8::emulateCycle() {
         case 0x0000:
             switch (nn) {
                 case 0x00E0: // clear the screen
-                    // chip8_draw_flag = true;
-                    // _renderer->clear();
                     _clearFrameBuffer();
                     pc += 2;
                     break;
@@ -254,7 +260,6 @@ void Chip8::emulateCycle() {
             }
 
             pc += 2;
-            // chip8_draw_flag = true;
             break;
         case 0xE000: // key-pressed events
             switch (nn) {
@@ -328,4 +333,7 @@ void Chip8::emulateCycle() {
         default:
             invalidOpcode(opcode);
     }
+
+    // if at break point, set the pause state
+    if (pc == breakPointAddress) pause = true;
 }

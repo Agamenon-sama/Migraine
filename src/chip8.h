@@ -1,10 +1,8 @@
 #pragma once
 
-#include <iostream>
 #include <cstdint>
 #include <string>
 #include <random>
-#include <chrono>
 
 /**
  * @brief Implementation of the emulator
@@ -47,14 +45,17 @@ public:
     uint16_t sp; ///< @brief Stack pointer
     uint16_t pc; ///< @brief Program counter
     uint16_t opcode; ///< @brief Currently loaded opcode
-    uint8_t delayTimer;
-    uint8_t soundTimer;
+    uint8_t delayTimer; ///< @brief Timer used for timing and delays
+    uint8_t soundTimer; ///< @brief Timer used to play sound when nonzero
 
     uint8_t *mem; ///< @brief RAM
 
     std::mt19937 rng; ///< @brief Random number generator used by 0xCXNN instruction
 
     uint8_t _frameBuffer[32][64]; ///< @brief Frame buffer holding current pixel values
+
+    int breakPointAddress; ///< @brief Address at which we pause execution
+    bool pause; ///< @brief Determines if we execute or not for debugging purposes
 
 private:
     /**

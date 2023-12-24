@@ -88,11 +88,40 @@ void Debugger::render() {
 
     ImGui::Text("Controls");
     if (ImGui::Button("Emulate cycle")) {
+        if (_chip->pause) {
+            _chip->pause = false;
+        }
         _chip->emulateCycle();
     }
 
-    if (ImGui::Button("reset")) { _chip->reset(); } ImGui::SameLine();
+    if (ImGui::Button("pause")) {
+        SDL_Event ev;
+        ev.type = SDL_USEREVENT;
+        ev.user.code = 1;
+        SDL_PushEvent(&ev);
+    } ImGui::SameLine();
+    if (ImGui::Button("resume")) {
+        SDL_Event ev;
+        ev.type = SDL_USEREVENT;
+        ev.user.code = 2;
+        SDL_PushEvent(&ev);
+        if (_chip->pause) {
+            _chip->pause = false;
+        }
+    } ImGui::SameLine();
+    if (ImGui::Button("restart")) { _chip->reset(); } ImGui::SameLine();
     if (ImGui::Button("unset")) { _chip->unset(); }
+
+    ImGui::InputInt("break point address", &_chip->breakPointAddress,
+        1, 100, ImGuiInputTextFlags_CharsHexadecimal); ImGui::SameLine();
+
+    if (_chip->pause) {
+        // when we reach the break point address, we pause
+        SDL_Event ev;
+        ev.type = SDL_USEREVENT;
+        ev.user.code = 1;
+        SDL_PushEvent(&ev);
+    }
 
     ImGui::End();
 

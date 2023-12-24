@@ -11,7 +11,7 @@ It's called Migraine because trust me, this project is a real headache
 - The emulator is good
 - The renderer is great
 - The sound is good
-- The debugger is half ok
+- The debugger is ok
 - The assembler is half ok
 - The disassembler is still in very early stages
 - The compiler is still just a dream for now
