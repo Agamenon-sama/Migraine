@@ -7,29 +7,39 @@ static void usage(char *prog);
 static void license();
 
 int main(int argc, char *argv[]) {
+    // Help & license
+    if (argc == 2 && (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help")) {
+        usage(argv[0]);
+        return 0;
+    }
     if (argc == 2 && (std::string(argv[1]) == "-l" || std::string(argv[1]) == "--license")) {
         license();
         return 0;
     }
 
+    // Assembler
     if (argc == 3 && (std::string(argv[1]) == "-a" || std::string(argv[1]) == "--assemble")) {
         Assembler ass;
         return (ass.assemble(argv[2]) ? 0 : 2);
     }
-    if (argc < 2 || argc >= 4) {
-        usage(argv[0]);
-        return 1;
+
+    // Emulator
+    if (argc == 1) {
+        Emulator vm("");
+        vm.run();
     }
-    else if (argc == 3 && std::string(argv[1]) == "-d") {
-        Emulator vm(argv[2], true);
+    else if (argc == 2 && std::string(argv[1]) == "-d") {
+        Emulator vm("", true);
         vm.run();
     }
     else if (argc == 2 && std::string(argv[1]) != "-d") {
         Emulator vm(argv[1]);
         vm.run();
     }
-    // todo: implement this when I implement drag & drop
-    // else if (argc == 2 && argv[1] == "-d") {}
+    else if (argc == 3 && std::string(argv[1]) == "-d") {
+        Emulator vm(argv[2], true);
+        vm.run();
+    }
     else {
         usage(argv[0]);
         return 1;

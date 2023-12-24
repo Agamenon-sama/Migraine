@@ -14,8 +14,13 @@ public:
      * 
      *  @param path path to the rom file to load
     */
-    MainWindow(const std::string &path, uint8_t pixelSize);
+    MainWindow(uint8_t pixelSize);
     ~MainWindow();
+
+    /**
+     * @brief Loads a new rom to the emulator and sets the title appropriately
+    */
+    void loadRom(const std::string &path);
 
     /**
      * @brief Draws to the emulator window

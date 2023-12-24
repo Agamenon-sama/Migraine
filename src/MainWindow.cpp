@@ -4,8 +4,8 @@
 
 #include "system/MessageBox.h"
 
-MainWindow::MainWindow(const std::string &path, uint8_t pixelSize)
-    : Window(path, 64 * pixelSize, 32 * pixelSize) {
+MainWindow::MainWindow(uint8_t pixelSize)
+    : Window("Migraine", 64 * pixelSize, 32 * pixelSize) {
 
     // Load OpenGL. NEVER FORGET TO LOAD OpenGL
     if (!gladLoadGLLoader(((GLADloadproc) SDL_GL_GetProcAddress))) {
@@ -15,7 +15,6 @@ MainWindow::MainWindow(const std::string &path, uint8_t pixelSize)
 
     _c8 = new Chip8();
     _renderer = new Renderer(_c8);
-    _c8->load(path);
 }
 
 MainWindow::~MainWindow() {
@@ -24,6 +23,12 @@ MainWindow::~MainWindow() {
     free();
 }
 
+void MainWindow::loadRom(const std::string &path) {
+    _c8->unset();
+    if (_c8->load(path)) {
+        SDL_SetWindowTitle(_window, path.substr(path.find_last_of('/') + 1).c_str());
+    }
+}
 
 void MainWindow::render() {
     makeCurrent();

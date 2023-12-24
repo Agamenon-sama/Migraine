@@ -28,7 +28,7 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
 
     _loadConfig();
 
-    _main  = new MainWindow(path, _pixelSize);
+    _main  = new MainWindow(_pixelSize);
     _debug = new Debugger(_main->_c8, _beeper);
     
     if (!_debugMode) _debug->hide();
@@ -36,6 +36,12 @@ Emulator::Emulator(const std::string &path, bool debugMode) {
     _main->_renderer->setOnColor(_onColor[0], _onColor[1], _onColor[2]);
     _main->_renderer->setOffColor(_offColor[0], _offColor[1], _offColor[2]);
 
+    if (path == "") {
+        _debugMode = true;
+    }
+    else {
+        _main->loadRom(path);
+    }
 }
 
 Emulator::~Emulator() {
@@ -222,6 +228,12 @@ void Emulator::run() {
                     _debug->show();
                     break;
                 }
+            }
+            else if (event.type == SDL_DROPFILE) {
+                char *fileName = event.drop.file;
+                _main->loadRom(fileName);
+                SDL_free(fileName);
+                _debugMode = false;
             }
 
             // handle window events
