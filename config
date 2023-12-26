@@ -1,0 +1,28 @@
+# width and height of the on screen pixel
+pixel_size = 11
+
+# number of executed opcodes per second
+# since the emulator is run according to your monitor refresh rate,
+# if your monitor runs at 60 fps and you want the emulator to run
+# at 600Hz, then set the cycles_per_frame to 10
+# cpu_clock_speed = frames_per_second x cycles_per_frame
+cycles_per_frame = 10
+
+# color of the lit pixel
+lit_pixel = 458EAA
+
+# color of the unlit pixel
+unlit_pixel = 222
+
+# frequency of the sound
+sound_frequency = 440
+
+# volume of the sound
+sound_volume = 0.3
+
+# wave form of the audio signal
+# sin = sin wave
+# triangle = triangle wave
+# anything else = square wave
+sound_signal = square
+
