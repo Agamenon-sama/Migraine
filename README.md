@@ -4,7 +4,8 @@ Migraine is an attempt to create a full environment for chip8 made of an emulato
 
 It's called Migraine because trust me, this project is a real headache
 
-![screenshot](screenshot.png)
+![Emulator Window](Emulator_Image.png)
+![Debugger Window](Debugger_Image.png)
 
 ## Status
 
